@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kristína Magyarová - Senior Product Manager, AI-driven products</title>
+<meta name="description" content="Senior Product Manager working on AI-driven products across fintech, insurance and banking - selected AI work, case studies, and how I actually use AI day to day.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --rose:        #9E4A63;
+    --rose-deep:   #7E3850;
+    --blush:       #F8EDF0;
+    --blush-deep:  #F2DCE3;
+    --ink:         #2E2A2C;
+    --ink-soft:    #5C5457;
+    --muted:       #857A7E;
+    --rule:        #E9DDE1;
+    --page:        #FFFFFF;
+    --code-bg:     #FBF6F7;
+
+    --display: "Lora", Georgia, "Times New Roman", serif;
+    --body:    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+    --maxw: 1120px;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+
+  body{
+    margin:0;
+    background:var(--page);
+    color:var(--ink);
+    font-family:var(--body);
+    font-size:15px;
+    line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 32px; }
+
+  a{ color:var(--rose-deep); text-decoration:none; border-bottom:1px solid var(--blush-deep); }
+  a:hover{ border-bottom-color:var(--rose); }
+  a:focus-visible{ outline:2px solid var(--rose); outline-offset:3px; border-radius:2px; }
+
+  /* ---------- masthead ---------- */
+  .masthead{ background:var(--blush); border-bottom:1px solid var(--blush-deep); }
+  .masthead .wrap{ padding-top:54px; padding-bottom:46px; }
+
+  .eyebrow{
+    font-size:10.5px; letter-spacing:.20em; text-transform:uppercase;
+    color:var(--rose); font-weight:600; margin:0 0 22px;
+  }
+
+  h1{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:clamp(30px, 4.4vw, 46px);
+    line-height:1.16;
+    letter-spacing:-.012em;
+    margin:0 0 18px;
+    max-width:24ch;
+  }
+
+  .standfirst{
+    font-size:16.5px; line-height:1.6; color:var(--ink-soft);
+    max-width:64ch; margin:0;
+  }
+
+  .byline{
+    margin-top:28px; padding-top:20px; border-top:1px solid var(--blush-deep);
+    display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 18px;
+  }
+  .byline .name{ font-family:var(--display); font-weight:600; font-size:17px; }
+  .byline .role{
+    font-size:10.5px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--rose); font-weight:600;
+  }
+  .byline .dot{ color:var(--blush-deep); }
+  .byline .meta{ font-size:13px; color:var(--muted); }
+
+  /* ---------- stat row ---------- */
+  .statband{ border-bottom:1px solid var(--rule); }
+  .statband .wrap{
+    display:grid; grid-template-columns:repeat(4,1fr);
+    padding-top:32px; padding-bottom:32px;
+  }
+  .stat{ text-align:center; padding:2px 14px; border-left:1px solid var(--rule); }
+  .stat:first-child{ border-left:0; }
+  .stat b{
+    display:block; font-family:var(--display); font-weight:600;
+    font-size:clamp(26px,3.4vw,34px); line-height:1.1; color:var(--ink);
+    font-variant-numeric:tabular-nums; letter-spacing:-.01em;
+  }
+  .stat span{
+    display:block; margin-top:7px; font-size:11px; line-height:1.4;
+    color:var(--muted); letter-spacing:.03em;
+  }
+
+  /* ---------- body layout ---------- */
+  .layout{
+    display:grid; grid-template-columns:232px 1fr; gap:56px;
+    padding-top:52px; padding-bottom:80px; align-items:start;
+  }
+
+  .side{ position:sticky; top:32px; }
+  .side dl{ margin:0; }
+  .side dt{
+    font-family:var(--display); font-size:16px; color:var(--rose);
+    font-weight:500; margin:0 0 8px;
+  }
+  .side dd{
+    margin:0 0 26px; font-size:13px; line-height:1.62; color:var(--ink-soft);
+    padding-bottom:26px; border-bottom:1px solid var(--rule);
+  }
+  .side dd:last-of-type{ border-bottom:0; }
+  .side ul{ margin:0; padding:0; list-style:none; }
+  .side li{ margin:0 0 5px; }
+  .side .k{ color:var(--muted); }
+
+  .main{ min-width:0; }
+
+  section{ margin:0 0 44px; }
+  section:last-child{ margin-bottom:0; }
+
+  h2{
+    font-family:var(--display); font-weight:500; font-size:24px;
+    color:var(--rose); margin:0 0 4px; letter-spacing:-.005em;
+  }
+  .h2rule{ height:1px; background:var(--rule); margin:0 0 20px; }
+  .h2sub{ font-size:13.5px; color:var(--muted); margin:0 0 22px; max-width:60ch; }
+
+  h3{
+    font-family:var(--display); font-weight:600; font-size:17px;
+    margin:26px 0 8px; color:var(--ink);
+  }
+
+  p{ margin:0 0 14px; max-width:70ch; }
+  strong{ font-weight:600; }
+  em{ font-style:italic; }
+
+  /* ---------- featured case-study card ---------- */
+  .case-card{
+    background:var(--blush); border-radius:6px;
+    padding:26px 26px 22px; margin:0 0 18px; max-width:none;
+  }
+  .case-card .kicker{
+    font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--rose); font-weight:600; margin:0 0 8px;
+  }
+  .case-card h3{
+    margin:0 0 8px; font-size:20px;
+  }
+  .case-card p{ color:var(--ink-soft); font-size:14.5px; max-width:66ch; }
+  .case-card .cta{
+    display:inline-block; margin-top:4px; font-size:13.5px; font-weight:600;
+    color:var(--rose-deep); border-bottom:1px solid var(--rose-deep);
+  }
+  .case-card .cta:hover{ color:var(--rose); border-bottom-color:var(--rose); }
+
+  /* ---------- compact work item (client / internal AI work) ---------- */
+  .finding{
+    border-left:2px solid var(--rose); padding:2px 0 2px 20px;
+    margin:0 0 18px; max-width:70ch;
+  }
+  .finding b{
+    display:block; font-family:var(--display); font-size:16.5px;
+    font-weight:600; margin-bottom:3px;
+  }
+  .finding .tag{
+    font-style:italic; color:var(--muted); font-weight:400; font-size:12.5px;
+  }
+  .finding span.desc{ display:block; color:var(--ink-soft); font-size:14.5px; }
+
+  footer{ background:var(--blush); border-top:1px solid var(--blush-deep); }
+  footer .wrap{ padding-top:34px; padding-bottom:44px; }
+  footer p{ font-size:13px; color:var(--ink-soft); margin:0 0 8px; max-width:74ch; }
+  footer .contact{ margin-top:16px; font-size:13px; }
+  footer .contact span{ color:var(--muted); }
+
+  .rise{ opacity:0; transform:translateY(6px); animation:rise .5s ease forwards; }
+  .rise:nth-of-type(2){ animation-delay:.06s; }
+  @keyframes rise{ to{ opacity:1; transform:none; } }
+  @media (prefers-reduced-motion:reduce){ .rise{ animation:none; opacity:1; transform:none; } }
+
+  @media (max-width:880px){
+    .layout{ grid-template-columns:1fr; gap:38px; padding-top:38px; }
+    .side{ position:static; }
+    .side dd{ margin-bottom:20px; padding-bottom:20px; }
+    .statband .wrap{ grid-template-columns:repeat(2,1fr); gap:24px 0; }
+    .stat:nth-child(3){ border-left:0; }
+    .wrap{ padding:0 22px; }
+  }
+  @media (max-width:520px){
+    .statband .wrap{ grid-template-columns:1fr; }
+    .stat{ border-left:0; border-top:1px solid var(--rule); padding-top:18px; }
+    .stat:first-child{ border-top:0; padding-top:0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">Senior Product Manager · AI-driven products · Bratislava</p>
+    <h1>I don't trust an AI feature until I can tell you the number that would make me kill it.</h1>
+    <p class="standfirst">4+ years in product across fintech, insurance and banking (Vacuumlabs) - now focused on how AI actually gets designed, tested and shipped inside real products. This site collects the AI work I can show in full: what I built, what I owned, and what I'd still call unproven.</p>
+    <div class="byline">
+      <span class="name">Kristína Magyarová</span>
+      <span class="dot">·</span>
+      <span class="role">Senior Product Manager</span>
+      <span class="dot">·</span>
+      <span class="meta"><a href="https://linkedin.com/in/kristymagyarova">linkedin.com/in/kristymagyarova</a></span>
+    </div>
+  </div>
+</header>
+
+<div class="statband">
+  <div class="wrap">
+    <div class="stat"><b>6</b><span>AI initiatives<br>led or shaped</span></div>
+    <div class="stat"><b>4+</b><span>years<br>in product</span></div>
+    <div class="stat"><b>10+</b><span>products &amp; platforms<br>shipped</span></div>
+    <div class="stat"><b>6</b><span>industries</span></div>
+  </div>
+</div>
+
+<div class="wrap">
+<div class="layout">
+
+  <aside class="side">
+    <dl>
+      <dt>who I am</dt>
+      <dd>Senior Product Manager at Vacuumlabs since 2022 - discovery through delivery across fintech, insurance, banking, investment, legal and identity verification. Before that, UX/UI design and product at Habitable.co.</dd>
+
+      <dt>how I use AI</dt>
+      <dd>Daily, hands-on: Claude (chat, Cowork, Code) and n8n - for client delivery, prototyping, and building my own tools end to end, not just talking about them.</dd>
+
+      <dt>certifications</dt>
+      <dd>Claude Certified Associate &ndash; Foundations<br><span class="k">Anthropic · 2026</span></dd>
+
+      <dt>industries</dt>
+      <dd>Banking · Insurance · FinTech · Investment · Legal · Identity Verification</dd>
+
+      <dt>elsewhere</dt>
+      <dd><a href="https://linkedin.com/in/kristymagyarova">linkedin.com/in/kristymagyarova</a></dd>
+    </dl>
+  </aside>
+
+  <main class="main">
+
+    <section class="rise">
+      <h2>case studies</h2><div class="h2rule"></div>
+      <p class="h2sub">The two pieces of AI work I can show completely - built end to end, with the reasoning, the mistakes, and the numbers included.</p>
+
+      <div class="case-card">
+        <p class="kicker">Eval case study · built with n8n</p>
+        <h3>The eval said 0.96. The product was dropping every number in the story.</h3>
+        <p>I built a golden-set, LLM-as-judge evaluation layer for a personal news-digest pipeline - then validated the judge blind against my own labels. It caught a truncation bug that had been quietly cutting real accuracy from 0.96 to roughly 0.17, and measured a ±0.04 noise floor that most "prompt improvements" never clear.</p>
+        <a class="cta" href="https://kristymagyarova.github.io/eval-case-study">Read the case study →</a>
+      </div>
+
+      <div class="case-card">
+        <p class="kicker">iOS app · built with Claude Code</p>
+        <h3>56 commits, zero Swift experience - the gym app I actually use</h3>
+        <p>I'm not a programmer. I wrote the spec, made the product and data-model decisions, and reviewed every change - Claude Code wrote and committed the Swift. This is what that collaboration looked like in practice, including the design pass we redid three times and the feature I deliberately didn't build.</p>
+        <a class="cta" href="gym-tracker/index.html">Read the case study →</a>
+      </div>
+    </section>
+
+    <section class="rise">
+      <h2>more AI work</h2><div class="h2rule"></div>
+      <p class="h2sub">Work I've delivered through my day-to-day role - summarized here where client confidentiality applies, ordered by how hands-on I was.</p>
+
+      <div class="finding">
+        <b>AI-Driven Risk Commentary Engine <span class="tag">- InsureTech broker, CEE</span></b>
+        <span class="desc">Designed and iteratively tested the prompts powering an AI-driven risk-commentary engine that analyzes historical claims trends and generates recommendations; handed to engineering for implementation.</span>
+      </div>
+
+      <div class="finding">
+        <b>AI Chatbot Initiative <span class="tag">- internal, my own initiative</span></b>
+        <span class="desc">I spotted the opportunity, designed it, and built it in n8n myself, for our marketing team. Currently in active development - I own the roadmap and work directly with engineering on integration.</span>
+      </div>
+
+      <div class="finding">
+        <b>AI Insurance Proposal Comparison <span class="tag">- InsureTech broker, CEE, PoC</span></b>
+        <span class="desc">Designed the UX and Figma prototype for an AI assistant that extracts and compares insurer proposals into a clear comparison table with a recommended offer. The underlying multi-agent extraction and comparison engine was built by the engineering team.</span>
+      </div>
+
+      <div class="finding">
+        <b>Legal AI Tool &amp; Chatbot <span class="tag">- Legaltech company</span></b>
+        <span class="desc">Contributed to a legal AI tool and virtual assistant built on LLMs - planning, key features, and scoring answer quality against the client's historical responses.</span>
+      </div>
+    </section>
+
+  </main>
+</div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>Everything on this site is either something I built myself (and can walk through in full) or client work I'm honest about the scope of - the parts I owned, and the parts a dev or design team built on top of my product decisions.</p>
+    <p class="contact"><span>Kristína Magyarová · Senior Product Manager ·</span> <a href="https://linkedin.com/in/kristymagyarova">linkedin.com/in/kristymagyarova</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
