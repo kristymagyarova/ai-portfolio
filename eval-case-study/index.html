@@ -2,8 +2,8 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GymTracker - an iOS app built with Claude Code - Kristína Magyarová</title>
-<meta name="description" content="How I spec'd, reviewed and shipped my own SwiftUI workout-tracking app, with Claude Code writing the Swift.">
+<title>Measuring an LLM digest - eval case study - Kristína Magyarová</title>
+<meta name="description" content="Building an evaluation layer for an LLM newsletter digest with n8n's native evaluation nodes: golden set, validated judge, measured noise floor.">
 <style>/* cyrillic-ext */
 @font-face {
   font-family: 'JetBrains Mono';
@@ -396,24 +396,44 @@
   section:last-child{ margin-bottom:0; }
   h2{ font-family:var(--display); font-weight:300; font-size:clamp(21px,2.2vw,27px); color:var(--ink); margin:0 0 6px; letter-spacing:-0.008em; }
   .h2rule{ height:1px; background:var(--rule); margin:0 0 22px; }
+  h3{ font-family:var(--display); font-weight:500; font-size:17px; margin:26px 0 8px; color:var(--ink); }
   p{ margin:0 0 15px; max-width:70ch; color:var(--ink-soft); font-weight:300; }
   strong{ font-weight:600; color:var(--ink); }
-  code{ font-family:var(--mono); font-size:12.5px; background:var(--code-bg); color:var(--accent); padding:2px 6px; border-radius:3px; border:1px solid var(--rule-soft); }
+  em{ font-style:italic; }
+
+  ul.list{ margin:0 0 15px; padding:0; list-style:none; max-width:70ch; }
+  ul.list li{ position:relative; padding-left:20px; margin:0 0 9px; color:var(--ink-soft); }
+  ul.list li::before{ content:""; position:absolute; left:0; top:.72em; width:7px; height:1px; background:var(--accent); }
 
   .finding{ border-left:2px solid var(--accent); padding:2px 0 2px 20px; margin:0 0 18px; max-width:70ch; }
   .finding b{ display:block; font-family:var(--display); font-weight:500; font-size:16.5px; color:var(--ink); margin-bottom:5px; }
   .finding span{ display:block; color:var(--ink-soft); font-size:14.5px; }
+
+  .tablewrap{ overflow-x:auto; margin:0 0 18px; }
+  table{ border-collapse:collapse; width:100%; font-size:13.5px; font-variant-numeric:tabular-nums; }
+  caption{ caption-side:bottom; text-align:left; font-size:12px; color:var(--muted); padding-top:9px; font-style:italic; }
+  th,td{ text-align:left; padding:9px 14px 9px 0; border-bottom:1px solid var(--rule-soft); color:var(--ink-soft); }
+  thead th{ font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); font-weight:600; border-bottom:1px solid var(--rule); padding-bottom:7px; }
+  td.num,th.num{ text-align:right; padding-right:22px; }
+  .yes{ color:var(--accent); }
+  .no{ color:var(--dim); }
+
+  code{ font-family:var(--mono); font-size:12.5px; background:var(--code-bg); color:var(--accent); padding:2px 6px; border-radius:3px; border:1px solid var(--rule-soft); }
+  pre{ background:var(--code-bg); border:1px solid var(--rule-soft); border-radius:6px; padding:14px 16px; overflow-x:auto; margin:0 0 18px; max-width:70ch; }
+  pre code{ background:none; border:0; padding:0; color:var(--ink-soft); font-size:12.5px; }
+
+  .noise{ max-width:70ch; margin:6px 0 20px; padding:22px 22px 16px; background:rgba(79,181,172,0.06); border:1px solid var(--rule-soft); border-radius:6px; }
+  .noise-track{ position:relative; height:44px; margin:0 6px; border-bottom:1px solid var(--rule-soft); }
+  .noise-run{ position:absolute; bottom:-4px; width:9px; height:9px; border-radius:50%; background:var(--accent); transform:translateX(-50%); }
+  .noise-run i{ position:absolute; bottom:14px; left:50%; transform:translateX(-50%); font-style:normal; font-size:11.5px; color:var(--accent); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .noise-scale{ display:flex; justify-content:space-between; margin:7px 6px 0; font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .noise-note{ margin:12px 0 0; font-size:12.5px; color:var(--ink-soft); max-width:none; }
 
   figure{ margin:0 0 22px; }
   figure img{ display:block; width:100%; height:auto; border:1px solid var(--rule); border-radius:6px; background:var(--code-bg); }
   figcaption{ margin-top:9px; font-size:12px; color:var(--muted); font-style:italic; max-width:70ch; }
   .shot-missing{ border:1px dashed rgba(79,181,172,0.35); border-radius:6px; background:rgba(79,181,172,0.06); padding:34px 20px; text-align:center; font-size:12.5px; color:var(--accent); }
   .shot-missing code{ background:rgba(7,8,11,0.4); }
-  .shot-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:0 0 22px; }
-  @media (max-width:620px){ .shot-grid{ grid-template-columns:1fr; } }
-
-  .video-slot{ border:1px dashed rgba(79,181,172,0.35); border-radius:6px; background:rgba(79,181,172,0.06); padding:54px 20px; text-align:center; font-size:12.5px; color:var(--accent); max-width:70ch; }
-  .video-slot code{ background:rgba(7,8,11,0.4); }
 
   footer{ position:relative; z-index:1; border-top:1px solid var(--rule); }
   footer .wrap{ padding:clamp(40px,6vw,64px) clamp(20px,5vw,56px); }
@@ -439,7 +459,7 @@
 <div style="position:relative">
   <div class="aurora" style="height:900px;">
     <div class="blob" style="left:78%;top:-8%;width:min(70vw,780px);aspect-ratio:1.2/1;transform:translate(-50%,0);background:radial-gradient(circle at 50% 50%, rgba(64,236,212,0.55) 0%, rgba(64,236,212,0.22) 46%, rgba(64,236,212,0) 74%);"></div>
-    <div class="blob" style="left:18%;top:6%;width:min(48vw,560px);aspect-ratio:1.1/1;transform:translate(-50%,0);background:radial-gradient(circle at 50% 50%, rgba(255,158,66,0.4) 0%, rgba(255,158,66,0.16) 48%, rgba(255,158,66,0) 76%);"></div>
+    <div class="blob" style="left:18%;top:6%;width:min(48vw,560px);aspect-ratio:1.1/1;transform:translate(-50%,0);background:radial-gradient(circle at 50% 50%, rgba(255,86,178,0.35) 0%, rgba(255,86,178,0.14) 48%, rgba(255,86,178,0) 76%);"></div>
   </div>
 
   <header>
@@ -451,9 +471,9 @@
 
   <div class="masthead">
     <div class="masthead-in wrap">
-      <p class="eyebrow"><span class="ln"></span>iOS app &middot; built with Claude Code &middot; Aug-Sep 2026</p>
-      <h1>I wrote the spec. Claude Code wrote the Swift. I use it every week.</h1>
-      <p class="standfirst">GymTracker is a SwiftUI + SwiftData iOS app I use for every workout. I wrote the spec, made the product and data-model decisions, and reviewed every change - Claude Code wrote and committed the Swift. This is what that process actually looked like.</p>
+      <p class="eyebrow"><span class="ln"></span>Eval case study &middot; built with n8n &middot; July 2026</p>
+      <h1>The eval said 0.96. The product was dropping every number in the story.</h1>
+      <p class="standfirst">I built an evaluation layer for an LLM newsletter digest - hand-labelled golden set, an LLM judge validated blind against my own labels, coverage tracked across runs. The baseline came back at 0.96, which turned out to be a true measurement of a system that doesn't exist.</p>
       <div class="byline">
         <span class="name">Kristína Magyarová</span>
         <span class="dot">&middot;</span>
@@ -468,10 +488,10 @@
 <div class="statband">
   <div class="wrap">
     <div class="statgrid">
-      <div class="stat"><b>56</b><span>Commits, Aug-Sep 2026</span></div>
-      <div class="stat"><b>6</b><span>Weeks, spec to daily use</span></div>
-      <div class="stat"><b>0</b><span>External libraries</span></div>
-      <div class="stat"><b>100%</b><span>Offline, no server</span></div>
+      <div class="stat"><b>0.935</b><span>Baseline coverage, mean of 4</span></div>
+      <div class="stat"><b>&plusmn;0.04</b><span>Measured noise floor</span></div>
+      <div class="stat"><b>24</b><span>Judge verdicts checked by hand</span></div>
+      <div class="stat"><b>6&times;</b><span>Gap vs. shipped output</span></div>
     </div>
   </div>
 </div>
@@ -481,85 +501,198 @@
 
   <aside class="side">
     <dl>
-      <dt>my role</dt>
-      <dd>I wrote the spec, made the product and data-model decisions, and reviewed every change. Claude Code wrote and committed the Swift, one small change at a time.</dd>
+      <dt>the system</dt>
+      <dd>A scheduled n8n workflow reads four AI/tech feeds each weekday morning, Claude writes a short digest of each story, and it lands in my inbox at 08:00.</dd>
+
+      <dt>the question</dt>
+      <dd>The digest looked fine. "Looked fine" is not a quality claim - so what number would I defend it with, and how would I know that number wasn't lying to me?</dd>
+
+      <dt>done this before</dt>
+      <dd>Back in 2023 I had already run a version of this in client work, without calling it an eval: scoring a legal AI chatbot's answers against the client's historical responses and averaging across a sample. This is the same discipline, with the loop closed and the judge itself checked.</dd>
 
       <dt>stack</dt>
       <dd>
         <ul>
-          <li><span class="k">Language</span> Swift + SwiftUI</li>
-          <li><span class="k">Persistence</span> SwiftData</li>
-          <li><span class="k">Target</span> iOS 17+</li>
-          <li><span class="k">Dependencies</span> none - Apple frameworks only</li>
-          <li><span class="k">Planned</span> CloudKit, ActivityKit</li>
+          <li><span class="k">Orchestration</span> n8n</li>
+          <li><span class="k">Eval</span> native evaluation nodes</li>
+          <li><span class="k">Dataset</span> Google Sheets</li>
+          <li><span class="k">Model</span> Claude Sonnet 4.5</li>
+          <li><span class="k">Judge</span> same model, temp 0</li>
         </ul>
       </dd>
 
-      <dt>how I worked</dt>
-      <dd>Plan before code, always. One feature = one change = one commit, with a plain-language summary of what changed and why. I pasted raw Xcode errors, unedited, whenever something broke.</dd>
-
-      <dt>design pipeline</dt>
-      <dd>Prototyped visual passes in Claude Design, then ported pixel-for-pixel into SwiftUI.</dd>
+      <dt>dataset</dt>
+      <dd>6 articles &middot; 24 atomic must-include facts &middot; labelled by hand, from full source text</dd>
 
       <dt>effort</dt>
-      <dd>56 commits across 6 weeks of evenings, alongside a full-time job</dd>
+      <dd>Four evenings, start to finish - including learning the tooling</dd>
     </dl>
   </aside>
 
   <main class="main">
 
     <section>
-      <h2>the product plan</h2><div class="h2rule"></div>
-      <p>Before any code, I defined the actual goal: log every set of every workout, with minimum friction mid-set, fully offline. From there I scoped an MVP - program setup, an exercise library, and the live workout flow - and pushed everything else into later waves: a rest timer, workout history, body-weight tracking, data export, and eventually a retrospective view of progress against each program's goal.</p>
-      <p>Only once that scope and sequencing were settled did work move to the data structure, and only after that to the screens themselves.</p>
+      <h2>what I found</h2><div class="h2rule"></div>
+      <div class="finding">
+        <b>The eval was scoring an easier task than the one production runs.</b>
+        <span>The golden set fed the model full articles. Production truncated each one to 600 characters of RSS snippet. Same article, same prompt, same model - coverage 1.00 in the eval, roughly 0.17 in the email that actually shipped.</span>
+      </div>
+      <div class="finding">
+        <b>Same input, same prompt - different output.</b>
+        <span>One run named five malware-laden games; the next named three. That single item moved coverage 1.00 &rarr; 0.83 with nothing changed.</span>
+      </div>
+      <div class="finding">
+        <b>The noise floor is &plusmn;0.04, so most "improvements" would have been imaginary.</b>
+        <span>Four identical runs returned 0.96 / 0.93 / 0.93 / 0.92. Any prompt change smaller than that isn't a result - and it costs four clicks to know that.</span>
+      </div>
     </section>
 
     <section>
-      <h2>the product decision</h2><div class="h2rule"></div>
-      <p><strong>Prescribed is not the same as trained.</strong> That's the one sentence the whole app is built to protect, and it's a product decision before it's a technical one.</p>
-      <p>A program defines what should happen: an ordered day, with prescribed sets, reps and starting weight. A session records what actually happened, logged directly against the exercise itself - not against the plan.</p>
-      <p>That separation is deliberate. If I swap an exercise mid-workout (the gym's cable machine is taken, so I do rows instead), the session should still record exactly what I did, without silently rewriting what was planned or losing the substitution. Plan and reality stay two different things, on purpose.</p>
-    </section>
-
-    <section>
-      <h2>designed for the gym floor</h2><div class="h2rule"></div>
-      <p>The interface rules came from actually using it mid-set, not from a design system: large touch targets, one-handed operation, minimum taps to log a set, readable at a glance on a screen I'm not looking at closely. Every set is pre-filled from the last time I did that exercise, so logging a normal set is a single tap, not data entry.</p>
-      <p>Ending a workout requires a confirmation. A stray tap mid-set shouldn't be able to erase 45 minutes of logged training.</p>
+      <h2>what gets measured</h2><div class="h2rule"></div>
+      <p><strong>Coverage</strong> - of the facts I hand-labelled as essential to a story, how many did the digest actually convey?</p>
+      <p>Two design decisions I'd defend:</p>
+      <p><strong>Coverage is a checklist, not a rating.</strong> I don't ask the judge to score quality 1-5; that number drifts between runs and can't be checked against a human. It gets 3-6 pre-labelled atomic facts per article and returns present or absent for each, <em>with a quote from the digest as evidence</em>. If it can't quote it, it's absent. Binary, auditable, and directly comparable to my own judgement.</p>
+      <p><strong>Partial counts as absent.</strong> If the label reads "~8,000 victims" and the digest says "thousands of victims", that's a miss - the number was the news. Without this rule the judge waves through exactly the failure mode I care about.</p>
       <figure>
-        <img src="screenshots/03-live-workout.png" alt="Live workout screen with set logging and rest timer">
-        <figcaption>Live workout - set logging, pre-filled from the last session of the same exercise.</figcaption>
+        <img src="screenshots/05-judge-output.png" alt="Judge output: per-item present/absent verdicts with an evidence quote for each">
+        <figcaption>The judge returns a verdict per labelled fact, each backed by an exact quote from the digest.</figcaption>
       </figure>
     </section>
 
     <section>
-      <h2>the design pass that got redone three times</h2><div class="h2rule"></div>
-      <p>The home screen's progress view is a panoramic "path to the summit" - a hike up a mountain range that fills in as the training block progresses. It went through visible iteration, commit by commit: three mountain layers aligned on the same curve, a lighter, more distant peak repositioned onto the same ridge as the main summit, then darker, less saturated mountain colors matched against a Claude Design reference image. None of that was code review - it was closer to art direction, done in plain language, one visual adjustment per commit.</p>
-      <div class="shot-grid">
-        <figure>
-          <img src="screenshots/01-home-liquid-glass.png" alt="GymTracker home screen, current design">
-          <figcaption>Home - current "liquid glass" design pass.</figcaption>
-        </figure>
-        <figure>
-          <img src="screenshots/02-mountain-progress.png" alt="Mountain path progress visualization">
-          <figcaption>The "path to the summit" progress view - three mountain layers on one shared ridge line.</figcaption>
-        </figure>
+      <h2>the golden set</h2><div class="h2rule"></div>
+      <p>Six articles, 24 atomic must-include facts, labelled by hand. Small - see limitations. Three rules I only arrived at by getting them wrong first:</p>
+      <ul class="list">
+        <li><strong>One fact per item.</strong> My first label read <code>Zyaire Wilkins, 21, Florida student, arrested by FBI</code> - four facts in one checkbox. The judge marked it present on the strength of the name and age; "student" appears nowhere in the digest. A compound item can't be half-ticked, so the judge defaults to lenient.</li>
+        <li><strong>Label from the full source, not the snippet.</strong> One label was written against a truncated excerpt, which made a correctly-reported figure look invented. A golden set is only as good as the text it was written from.</li>
+        <li><strong>Don't label what isn't there.</strong> Twice I caught myself writing a plausible fact the source never stated - the same failure I'm asking the judge to catch in the model.</li>
+      </ul>
+      <figure>
+        <img src="screenshots/04-golden-set.png" alt="Golden set spreadsheet with source text, must-include facts and results written back by n8n">
+        <figcaption>The dataset in Google Sheets. n8n reads it row by row and writes the digest, coverage and full judge verdict back into the same sheet.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>validating the judge</h2><div class="h2rule"></div>
+      <p>An unvalidated judge is a random number generator with good manners. Before trusting a single number it produced, I graded all 24 items myself - <strong>blind</strong>, with the judge's column hidden in the sheet until mine was finished - and compared.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Article</th><th class="num">Items</th><th>My verdicts</th><th>Judge</th><th>Agreement</th></tr></thead>
+          <tbody>
+            <tr><td>nl_001</td><td class="num">3</td><td>1 1 1</td><td>1 1 1</td><td class="yes">3 / 3</td></tr>
+            <tr><td>nl_002</td><td class="num">3</td><td>1 1 1</td><td>1 1 1</td><td class="yes">3 / 3</td></tr>
+            <tr><td>nl_003</td><td class="num">4</td><td>1 1 <span class="no">0</span> 1</td><td>1 1 <span class="no">0</span> 1</td><td class="yes">4 / 4</td></tr>
+            <tr><td>nl_004</td><td class="num">4</td><td>1 1 1 1</td><td>1 1 1 1</td><td class="yes">4 / 4</td></tr>
+            <tr><td>nl_005</td><td class="num">4</td><td>1 1 1 1</td><td>1 1 1 1</td><td class="yes">4 / 4</td></tr>
+            <tr><td>nl_006</td><td class="num">6</td><td>1 <span class="no">0</span> 1 1 1 1</td><td>1 <span class="no">0</span> 1 1 1 1</td><td class="yes">6 / 6</td></tr>
+          </tbody>
+        </table>
+        Raw agreement 24/24 &middot; Cohen's &kappa; = 1.00
       </div>
-      <p>Later, the whole app went through a second, larger pass: a "liquid glass" visual refresh across every screen, including one screen ported <strong>pixel-for-pixel from a Claude Design canvas file</strong> straight into SwiftUI. The design tool and the coding agent were two steps of one pipeline, not two separate tools I had to bridge myself.</p>
+      <p><strong>This is weaker than it looks, and I'd rather say so than oversell it.</strong> 22 of 24 items are "present", so a judge that answered "yes" to everything would still score 91.7% agreement. The test barely pressed on it. What it does establish is that we agree on both <em>negatives</em> - the two real misses - which is the direction that matters. To make this result mean something I need a golden set with more failure cases in it.</p>
     </section>
 
     <section>
-      <h2>how it's built</h2><div class="h2rule"></div>
-      <p>Everything lives in SwiftData, fully offline - there's no reason a set-logging app needs an account or a server. The schema is deliberately built around the plan/reality separation above, plus room for non-lifting activity (a run, a hike, a round of golf) without forcing it through the strength-training shape. I'm keeping the exact model to myself - it's a small app, but it's mine.</p>
+      <h2>finding 1 - measuring a system that doesn't exist</h2><div class="h2rule"></div>
+      <p>Baseline came back at 0.96. That felt too high, so I checked it against the digest that had actually been emailed that morning, on the same article.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Labelled fact</th><th>Shipped email</th><th>Eval run</th></tr></thead>
+          <tbody>
+            <tr><td>~8,000 victims</td><td class="no">"thousands of victims"</td><td class="yes">present</td></tr>
+            <tr><td>at least $220,000 stolen</td><td class="no">"drained cryptocurrency"</td><td class="yes">present</td></tr>
+            <tr><td>~80 crypto wallets</td><td class="no">absent</td><td class="yes">present</td></tr>
+            <tr><td>five named games</td><td class="no">absent</td><td class="yes">present</td></tr>
+            <tr><td><strong>coverage</strong></td><td class="no"><strong>~0.17</strong></td><td class="yes"><strong>1.00</strong></td></tr>
+          </tbody>
+        </table>
+        Same article, same prompt, same model - scored twice.
+      </div>
+      <p>The cause was one line of preprocessing in the production workflow:</p>
+      <pre><code>.slice(0, 600)</code></pre>
+      <p>Production truncated each article to 600 characters of RSS snippet. The figures live further down the article - the model never received them. Meanwhile the golden set held the full text I'd pasted in by hand.</p>
+      <p>So the model wasn't dropping the numbers. <strong>It never had them.</strong></p>
+      <h3>The fix</h3>
+      <p>Production now fetches each article URL, strips the page to text, and passes 4,000 characters instead of 600. The next morning's digest - a different story, this one on US EV sales - carried "5.8% market share, 247,226 units, -20.5%, $7,500 tax credit": figures that sit well beyond the 600-character cutoff the old pipeline used.</p>
+      <p><strong>What I take from it:</strong> an offline eval is only as valid as its resemblance to the production path. Mine diverged at one line, and the divergence flattered the score by roughly six times.</p>
+      <figure>
+        <img src="screenshots/01-production-flow.png" alt="The production n8n workflow: schedule, four RSS reads, merge, article fetch, Claude, Gmail">
+        <figcaption>Production after the fix - the article fetch and text extraction now sit between the feed merge and the model.</figcaption>
+      </figure>
     </section>
 
     <section>
-      <h2>what's next</h2><div class="h2rule"></div>
-      <p>Still in daily use, still being tuned - small fixes and refinements as real workouts keep surfacing edge cases the spec didn't anticipate.</p>
+      <h2>finding 2 - the same input doesn't give the same output</h2><div class="h2rule"></div>
+      <p>Re-running the eval unchanged, one digest named five games; the next named three. Coverage on that article moved 1.00 &rarr; 0.83. Nothing had changed - not the prompt, not the data, not the model.</p>
+      <p>This is ordinary sampling behaviour, but it has a blunt consequence for anyone reading a single eval score as truth: <strong>one run is one sample, not a measurement.</strong> Which leads directly to the next thing worth knowing.</p>
     </section>
 
     <section>
-      <h2>demo</h2><div class="h2rule"></div>
-      <div class="video-slot">Video walkthrough slot - drop in as <code>demo.mp4</code> (or embed a hosted link) and swap this block for a <code>&lt;video&gt;</code> or iframe embed.</div>
+      <h2>finding 3 - the noise floor</h2><div class="h2rule"></div>
+      <p>Four identical runs. No changes of any kind between them.</p>
+      <div class="noise">
+        <div class="noise-track">
+          <div class="noise-run" style="left:0%"><i>0.92</i></div>
+          <div class="noise-run" style="left:25%"><i>0.93 &times;2</i></div>
+          <div class="noise-run" style="left:100%"><i>0.96</i></div>
+        </div>
+        <div class="noise-scale"><span>0.92</span><span>mean 0.935 &middot; sd 0.017 &middot; range 0.04</span><span>0.96</span></div>
+        <p class="noise-note"><strong>Working rule:</strong> a difference below ~0.035 (2 sd) is not a result.</p>
+      </div>
+      <p>This is the cheapest useful number in the whole project - four clicks - and it's the one that prevents weeks spent tuning prompts against movement that was always going to happen anyway. It's also the answer to the first question anyone should ask about an A/B result: <em>how do you know that isn't noise?</em></p>
+      <figure>
+        <img src="screenshots/03-evaluations-runs.png" alt="n8n Evaluations tab showing coverage tracked across successive runs">
+        <figcaption>Runs tracked in n8n's Evaluations tab. Metrics are set by the workflow itself, so score history comes for free - no separate store.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>how it's wired</h2><div class="h2rule"></div>
+      <p>The eval is a second workflow, deliberately separate from production. It reads the golden set row by row, so every run scores the same frozen sample - otherwise a prompt change and a news cycle would move at the same time and neither could be blamed.</p>
+      <pre><code>When fetching a dataset row   -&gt; Google Sheets, one row per run
+  -&gt; HTTP Request                write the digest   (prompt under test)
+  -&gt; HTTP Request                judge the digest   (temp 0, JSON out)
+  -&gt; Code                        parse, score, fail loud on bad JSON
+  -&gt; Set Outputs                 write results back to the sheet
+  -&gt; Set Metrics                 track coverage across runs</code></pre>
+      <p>One detail worth naming: if the judge returns unparseable JSON, the workflow throws rather than recording a zero. A zero looks like a bad digest; it's actually a broken judge. Silently conflating the two would quietly poison every number downstream.</p>
+      <figure>
+        <img src="screenshots/02-eval-flow.png" alt="The eval workflow: dataset trigger, generate, judge, score, set outputs, set metrics">
+        <figcaption>Built on n8n's native evaluation nodes rather than a bespoke harness.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>limitations</h2><div class="h2rule"></div>
+      <p>Stated plainly, because an eval that hides these isn't an eval.</p>
+      <ul class="list">
+        <li><strong>n = 6 articles, 24 items.</strong> Enough to build and validate the mechanism; not enough for confident deltas.</li>
+        <li><strong>Class imbalance 22:2</strong> makes &kappa; = 1.00 far less impressive than the number suggests.</li>
+        <li><strong>Single labeller.</strong> No second annotator, so no measure of how much my own labels drift.</li>
+        <li><strong>Coverage only.</strong> It checks that required facts are present and is structurally blind to invented ones - a digest carrying every labelled fact <em>plus</em> a fabricated sentence would still score 1.00.</li>
+        <li><strong>Four runs</strong> is a thin basis for a noise estimate. The &plusmn;0.04 is indicative, not precise.</li>
+        <li><strong>No A/B yet</strong> - and at this sample size, against this noise floor, a small prompt delta would be unresolvable anyway.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>what six articles bought</h2><div class="h2rule"></div>
+      <p>The sample is small, and I'd rather be the one to say so. But the three things this surfaced don't depend on sample size, and that's the argument for building the smallest version first.</p>
+      <p><strong>A truncation bug, a non-deterministic model and a noise floor look the same at n=6 as at n=600.</strong> The 600-character cutoff was silently costing the product every verifiable number in a story, and it had been doing that in my inbox every weekday morning without me noticing. Six labelled articles found it in an evening. Six hundred would have found the same thing, later and at more cost.</p>
+      <p><strong>The mechanism now exists and has been checked.</strong> Dataset, judge, scoring, write-back, tracked metrics - and, importantly, a judge whose verdicts I've compared against my own rather than assumed. Growing this is labelling work now, not engineering work.</p>
+      <p><strong>The useful output was never 0.935.</strong> It was finding out that my first number described a system that doesn't exist, and that my second one moves by &plusmn;0.04 on its own. At this stage an eval's job isn't to certify that the product is good - it's to tell you whether you can trust your own numbers yet. Mine couldn't, twice. Now it can, within a range I can state.</p>
+      <p>The alternative was continuing to ship something that looked fine.</p>
+    </section>
+
+    <section>
+      <h2>what I'd do next</h2><div class="h2rule"></div>
+      <ul class="list">
+        <li><strong>Faithfulness</strong> - check each claim in the digest against its source. It needs no golden labels, because the source article <em>is</em> the reference, which means unlike coverage it can run on live production traffic.</li>
+        <li><strong>A guardrail on faithfulness</strong>, thresholded off the observed baseline distribution rather than a hand-picked number: block the digest and alert instead of shipping a fabricated claim.</li>
+        <li><strong>Grow the golden set toward failure cases</strong> - paywalled sources, multi-story roundups, corrections, opinion pieces with no hard facts.</li>
+        <li><strong>Cost and latency as first-class metrics.</strong> An eval that ignores them will happily recommend a prompt that triples the bill.</li>
+      </ul>
     </section>
 
   </main>
@@ -568,7 +701,7 @@
 
 <footer>
   <div class="wrap">
-    <p>Built across six weeks of evenings, alongside a full-time job. The first app I've shipped without writing a line of the code myself - spec'd, reviewed, and used every week since.</p>
+    <p>Built across four evenings, including learning the tooling. The workflows, the golden set and the judge prompts are the boring part - the useful part was checking whether the number I'd produced meant anything, and finding out twice that it didn't.</p>
     <p class="contact"><span class="name">Kristína Magyarová</span> &middot; Senior Product Manager &middot; <a href="https://linkedin.com/in/kristymagyarova">linkedin.com/in/kristymagyarova</a></p>
   </div>
 </footer>
