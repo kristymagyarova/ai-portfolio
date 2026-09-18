@@ -3,6 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Measuring an LLM digest - eval case study - Kristína Magyarová</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
 <meta name="description" content="Building an evaluation layer for an LLM newsletter digest with n8n's native evaluation nodes: golden set, validated judge, measured noise floor.">
 <style>/* cyrillic-ext */
 @font-face {
@@ -330,392 +331,508 @@
 }
 </style>
 <style>
-  :root{
-    --bg:        #07080B;
-    --ink:       #ECEAE6;
-    --ink-soft:  #C7C3CD;
-    --muted:     #B4AFBB;
-    --dim:       #857A8B;
-    --accent:    #4FB5AC;
-    --rule:      rgba(236,234,230,0.12);
-    --rule-soft: rgba(236,234,230,0.09);
-    --card:      #11141A;
-    --card-hi:   #141821;
-    --code-bg:   #11141A;
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; overflow-x:hidden; max-width:100%; }
+body { margin: 0; background: #07080B; color: #ECEAE6; font-family: Manrope, system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow-x:hidden; max-width:100%; }
+a { color: #ECEAE6; text-decoration: none; transition: color .2s ease; }
+a:hover { color: #4FB5AC; }
+::selection { background: rgba(79,181,172,0.35); }
 
-    --display: 'Newsreader', Georgia, serif;
-    --mono:    'JetBrains Mono', ui-monospace, monospace;
-    --body:    'Manrope', system-ui, -apple-system, sans-serif;
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: #07080B; color: #ECEAE6; font-family: Manrope, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #ECEAE6; text-decoration: none; transition: color .2s ease; }
+  a:hover { color: #4FB5AC; }
+  ::selection { background: rgba(79,181,172,0.35); }
+  @keyframes auroraA { 0%,100% { transform: translate3d(-4%,1%,0) scale(1) skewX(-4deg); opacity:.85 } 50% { transform: translate3d(6%,-5%,0) scale(1.22) skewX(3deg); opacity:1 } }
+  @keyframes auroraB { 0%,100% { transform: translate3d(5%,-3%,0) scale(1.12) skewX(5deg); opacity:.7 } 50% { transform: translate3d(-6%,4%,0) scale(0.94) skewX(-3deg); opacity:1 } }
+  @keyframes auroraC { 0%,100% { transform: translate3d(0,0,0) scale(1.06) rotate(-3deg); opacity:.6 } 50% { transform: translate3d(4%,5%,0) scale(1.3) rotate(6deg); opacity:.95 } }
+  @keyframes filament { 0%,100% { transform: translate(-50%,-50%) rotate(var(--r,0deg)) scaleX(0.9); opacity:.3 } 50% { transform: translate(-50%,-56%) rotate(var(--r,0deg)) scaleX(1.08); opacity:.85 } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 
-    --maxw: 1160px;
-  }
-  *,*::before,*::after{ box-sizing:border-box; }
-  html{ -webkit-text-size-adjust:100%; overflow-x:hidden; max-width:100%; }
-  body{ margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:15.5px; line-height:1.68; -webkit-font-smoothing:antialiased; overflow-x:hidden; max-width:100%; font-weight:300; }
-  .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 clamp(20px,5vw,56px); }
-  a{ color:var(--accent); text-decoration:none; border-bottom:1px solid rgba(79,181,172,0.4); }
-  a:hover{ border-bottom-color:var(--accent); }
-
-  .aurora{ position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
-  .blob{ position:absolute; border-radius:50%; mix-blend-mode:screen; filter:blur(56px); }
-
-  header{ position:sticky; top:0; z-index:30; background:rgba(7,8,11,0.6); backdrop-filter:blur(16px); border-bottom:1px solid var(--rule-soft); }
-  header .wrap{ padding:15px clamp(20px,5vw,56px); display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
-  .back{ font-family:var(--mono); font-size:12px; letter-spacing:0.04em; color:var(--muted); border-bottom:0; }
-  .back:hover{ color:var(--accent); }
-  .brand{ font-family:var(--mono); font-size:12px; letter-spacing:0.02em; color:var(--ink); border-bottom:0; }
-
-  .masthead{ position:relative; z-index:1; overflow:hidden; }
-  .masthead-in{ position:relative; z-index:1; padding:clamp(48px,7vw,88px) 0 clamp(40px,5vw,60px); }
-  .eyebrow{ font-family:var(--mono); font-size:11.5px; letter-spacing:0.13em; text-transform:uppercase; color:var(--accent); margin:0 0 clamp(20px,3vw,32px); display:flex; align-items:center; gap:10px; }
-  .eyebrow .ln{ width:22px; height:1px; background:var(--accent); display:inline-block; }
-  h1{ font-family:var(--display); font-weight:300; font-size:clamp(30px,4.6vw,52px); line-height:1.12; letter-spacing:-0.015em; margin:0 0 clamp(18px,2.6vw,26px); max-width:18em; }
-  .standfirst{ font-size:clamp(16px,1.3vw,18.5px); line-height:1.75; color:var(--ink-soft); max-width:62ch; margin:0 0 clamp(24px,3vw,34px); font-weight:300; }
-  .byline{ display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 16px; font-family:var(--mono); font-size:13px; color:var(--muted); padding-top:20px; border-top:1px solid var(--rule-soft); }
-  .byline .name{ color:var(--ink); }
-  .byline .dot{ opacity:0.5; }
-
-  .statband{ position:relative; z-index:1; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); }
-  .statgrid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); }
-  .stat{ padding:clamp(22px,3vw,34px) clamp(16px,2vw,26px); border-left:1px solid var(--rule-soft); }
-  .stat:first-child{ border-left:0; padding-left:0; }
-  .stat b{ display:block; font-family:var(--display); font-weight:300; font-size:clamp(30px,3.6vw,42px); color:var(--accent); line-height:1; }
-  .stat span{ display:block; margin-top:9px; font-family:var(--mono); font-size:10.8px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); }
-
-  .layout{ display:grid; grid-template-columns:230px 1fr; gap:clamp(32px,5vw,60px); padding:clamp(44px,6vw,80px) 0; align-items:start; }
-  .side{ position:sticky; top:80px; }
-  .side dt{ font-family:var(--mono); font-size:11.5px; letter-spacing:0.09em; text-transform:uppercase; color:var(--accent); margin:0 0 9px; }
-  .side dd{ margin:0 0 26px; padding-bottom:26px; font-size:13.5px; line-height:1.7; color:var(--ink-soft); border-bottom:1px solid var(--rule-soft); }
-  .side dd:last-of-type{ border-bottom:0; margin-bottom:0; }
-  .side ul{ margin:0; padding:0; list-style:none; }
-  .side li{ margin:0 0 6px; }
-  .side .k{ color:var(--muted); }
-
-  .main{ min-width:0; }
-  section{ margin:0 0 clamp(40px,5vw,56px); }
-  section:last-child{ margin-bottom:0; }
-  h2{ font-family:var(--display); font-weight:300; font-size:clamp(21px,2.2vw,27px); color:var(--ink); margin:0 0 6px; letter-spacing:-0.008em; }
-  .h2rule{ height:1px; background:var(--rule); margin:0 0 22px; }
-  h3{ font-family:var(--display); font-weight:500; font-size:17px; margin:26px 0 8px; color:var(--ink); }
-  p{ margin:0 0 15px; max-width:70ch; color:var(--ink-soft); font-weight:300; }
-  strong{ font-weight:600; color:var(--ink); }
-  em{ font-style:italic; }
-
-  ul.list{ margin:0 0 15px; padding:0; list-style:none; max-width:70ch; }
-  ul.list li{ position:relative; padding-left:20px; margin:0 0 9px; color:var(--ink-soft); }
-  ul.list li::before{ content:""; position:absolute; left:0; top:.72em; width:7px; height:1px; background:var(--accent); }
-
-  .finding{ border-left:2px solid var(--accent); padding:2px 0 2px 20px; margin:0 0 18px; max-width:70ch; }
-  .finding b{ display:block; font-family:var(--display); font-weight:500; font-size:16.5px; color:var(--ink); margin-bottom:5px; }
-  .finding span{ display:block; color:var(--ink-soft); font-size:14.5px; }
-
-  .tablewrap{ overflow-x:auto; margin:0 0 18px; }
-  table{ border-collapse:collapse; width:100%; font-size:13.5px; font-variant-numeric:tabular-nums; }
-  caption{ caption-side:bottom; text-align:left; font-size:12px; color:var(--muted); padding-top:9px; font-style:italic; }
-  th,td{ text-align:left; padding:9px 14px 9px 0; border-bottom:1px solid var(--rule-soft); color:var(--ink-soft); }
-  thead th{ font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); font-weight:600; border-bottom:1px solid var(--rule); padding-bottom:7px; }
-  td.num,th.num{ text-align:right; padding-right:22px; }
-  .yes{ color:var(--accent); }
-  .no{ color:var(--dim); }
-
-  code{ font-family:var(--mono); font-size:12.5px; background:var(--code-bg); color:var(--accent); padding:2px 6px; border-radius:3px; border:1px solid var(--rule-soft); }
-  pre{ background:var(--code-bg); border:1px solid var(--rule-soft); border-radius:6px; padding:14px 16px; overflow-x:auto; margin:0 0 18px; max-width:70ch; }
-  pre code{ background:none; border:0; padding:0; color:var(--ink-soft); font-size:12.5px; }
-
-  .noise{ max-width:70ch; margin:6px 0 20px; padding:22px 22px 16px; background:rgba(79,181,172,0.06); border:1px solid var(--rule-soft); border-radius:6px; }
-  .noise-track{ position:relative; height:44px; margin:0 6px; border-bottom:1px solid var(--rule-soft); }
-  .noise-run{ position:absolute; bottom:-4px; width:9px; height:9px; border-radius:50%; background:var(--accent); transform:translateX(-50%); }
-  .noise-run i{ position:absolute; bottom:14px; left:50%; transform:translateX(-50%); font-style:normal; font-size:11.5px; color:var(--accent); font-variant-numeric:tabular-nums; white-space:nowrap; }
-  .noise-scale{ display:flex; justify-content:space-between; margin:7px 6px 0; font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; }
-  .noise-note{ margin:12px 0 0; font-size:12.5px; color:var(--ink-soft); max-width:none; }
-
-  figure{ margin:0 0 22px; }
-  figure img{ display:block; width:100%; height:auto; border:1px solid var(--rule); border-radius:6px; background:var(--code-bg); }
-  figcaption{ margin-top:9px; font-size:12px; color:var(--muted); font-style:italic; max-width:70ch; }
-  .shot-missing{ border:1px dashed rgba(79,181,172,0.35); border-radius:6px; background:rgba(79,181,172,0.06); padding:34px 20px; text-align:center; font-size:12.5px; color:var(--accent); }
-  .shot-missing code{ background:rgba(7,8,11,0.4); }
-
-  footer{ position:relative; z-index:1; border-top:1px solid var(--rule); }
-  footer .wrap{ padding:clamp(40px,6vw,64px) clamp(20px,5vw,56px); }
-  footer p{ font-size:13px; color:var(--muted); margin:0 0 8px; max-width:74ch; }
-  footer .contact{ margin-top:16px; font-size:13px; font-family:var(--mono); color:var(--muted); }
-  footer .contact .name{ color:var(--ink); }
-
-  @media (max-width:880px){
-    .layout{ grid-template-columns:1fr; }
-    .side{ position:static; }
-    .statgrid{ grid-template-columns:repeat(2,1fr); }
-    .stat:nth-child(3){ border-left:0; }
-  }
-  @media (max-width:520px){
-    .statgrid{ grid-template-columns:1fr; }
-    .stat{ border-left:0 !important; border-top:1px solid var(--rule-soft); padding-left:0 !important; }
-    .stat:first-child{ border-top:0; }
-  }
+@media (max-width:640px) {
+  header > div { flex-wrap: wrap; }
+}
 </style>
 </head>
 <body>
+<div style="background:transparent;color:#ECEAE6;min-height:100vh;overflow-x:hidden;position:relative">
 
-<div style="position:relative">
-  <div class="aurora" style="height:900px;">
-    <div class="blob" style="left:78%;top:-8%;width:min(70vw,780px);aspect-ratio:1.2/1;transform:translate(-50%,0);background:radial-gradient(circle at 50% 50%, rgba(64,236,212,0.55) 0%, rgba(64,236,212,0.22) 46%, rgba(64,236,212,0) 74%);"></div>
-    <div class="blob" style="left:18%;top:6%;width:min(48vw,560px);aspect-ratio:1.1/1;transform:translate(-50%,0);background:radial-gradient(circle at 50% 50%, rgba(255,86,178,0.35) 0%, rgba(255,86,178,0.14) 48%, rgba(255,86,178,0) 76%);"></div>
+<div style="position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden">
+    <div style="position:absolute;left:76%;top:6%;width:min(80vw,920px);aspect-ratio:1.25/1;transform:translate(-50%,-38%)">
+      <div style="position:absolute;inset:0;border-radius:50%;mix-blend-mode:screen;filter:blur(58px);background:radial-gradient(circle at 50% 50%, rgba(64,236,212,0.95) 0%, rgba(64,236,212,0.95) 30%, rgba(64,236,212,0.47) 54%, rgba(64,236,212,0) 78%);animation:auroraA 30s ease-in-out infinite"></div>
+    </div>
+    <div style="position:absolute;left:93%;top:13%;width:min(58vw,700px);aspect-ratio:1.1/1;transform:translate(-50%,-38%)">
+      <div style="position:absolute;inset:0;border-radius:50%;mix-blend-mode:screen;filter:blur(52px);background:radial-gradient(circle at 50% 50%, rgba(255,158,66,0.9) 0%, rgba(255,158,66,0.9) 30%, rgba(255,158,66,0.45) 54%, rgba(255,158,66,0) 78%);animation:auroraB 37s ease-in-out infinite"></div>
+    </div>
+    <div style="position:absolute;left:62%;top:22%;width:min(52vw,620px);aspect-ratio:1.2/1;transform:translate(-50%,-38%)">
+      <div style="position:absolute;inset:0;border-radius:50%;mix-blend-mode:screen;filter:blur(60px);background:radial-gradient(circle at 50% 50%, rgba(64,236,212,0.75) 0%, rgba(64,236,212,0.75) 30%, rgba(64,236,212,0.38) 54%, rgba(64,236,212,0) 78%);animation:auroraC 44s ease-in-out infinite"></div>
+    </div>
+    <div style="position:absolute;left:88%;top:26%;width:min(40vw,480px);aspect-ratio:1.1/1;transform:translate(-50%,-38%)">
+      <div style="position:absolute;inset:0;border-radius:50%;mix-blend-mode:screen;filter:blur(54px);background:radial-gradient(circle at 50% 50%, rgba(255,86,178,0.65) 0%, rgba(255,86,178,0.65) 30%, rgba(255,86,178,0.33) 54%, rgba(255,86,178,0) 78%);animation:auroraB 49s ease-in-out infinite"></div>
+    </div>
+    <div style="position:absolute;left:86%;top:19%;width:min(52vw,640px);height:1.5px;--r:-7deg;transform:translate(-50%,-50%) rotate(-7deg);mix-blend-mode:screen;filter:blur(1.2px);background:linear-gradient(90deg, rgba(255,196,110,0) 0%, rgba(255,196,110,0.5) 38%, rgba(255,196,110,0.5) 62%, rgba(255,196,110,0) 100%);animation:filament 38s ease-in-out infinite;animation-delay:-0s"></div>
+    <div style="position:absolute;left:80%;top:23%;width:min(44vw,540px);height:1.5px;--r:5deg;transform:translate(-50%,-50%) rotate(5deg);mix-blend-mode:screen;filter:blur(1.2px);background:linear-gradient(90deg, rgba(64,236,212,0) 0%, rgba(64,236,212,0.38) 38%, rgba(64,236,212,0.38) 62%, rgba(64,236,212,0) 100%);animation:filament 46s ease-in-out infinite;animation-delay:-9s"></div>
+
+    <div style="position:absolute;left:40%;top:46%;width:min(74vw,860px);aspect-ratio:1.4/1;transform:translate(-50%,-50%)">
+      <div style="position:absolute;inset:0;border-radius:50%;mix-blend-mode:screen;filter:blur(62px);background:radial-gradient(circle at 50% 50%, rgba(64,236,212,0.88) 0%, rgba(64,236,212,0.88) 30%, rgba(64,236,212,0.44) 54%, rgba(64,236,212,0) 78%);animation:auroraB 52s ease-in-out infinite"></div>
+    </div>
+    <div style="position:absolute;left:66%;top:53%;width:min(54vw,640px);aspect-ratio:1.3/1;transform:translate(-50%,-50%)">
+      <div style="position:absolute;inset:0;border-radius:50%;mix-blend-mode:screen;filter:blur(56px);background:radial-gradient(circle at 50% 50%, rgba(255,158,66,0.72) 0%, rgba(255,158,66,0.72) 30%, rgba(255,158,66,0.36) 54%, rgba(255,158,66,0) 78%);animation:auroraA 58s ease-in-out infinite"></div>
+    </div>
+    <div style="position:absolute;left:22%;top:58%;width:min(46vw,560px);aspect-ratio:1.2/1;transform:translate(-50%,-50%)">
+      <div style="position:absolute;inset:0;border-radius:50%;mix-blend-mode:screen;filter:blur(52px);background:radial-gradient(circle at 50% 50%, rgba(255,86,178,0.52) 0%, rgba(255,86,178,0.52) 30%, rgba(255,86,178,0.26) 54%, rgba(255,86,178,0) 78%);animation:auroraC 46s ease-in-out infinite"></div>
+    </div>
+    <div style="position:absolute;left:46%;top:49%;width:min(56vw,680px);height:1.5px;--r:4deg;transform:translate(-50%,-50%) rotate(4deg);mix-blend-mode:screen;filter:blur(1.2px);background:linear-gradient(90deg, rgba(255,196,110,0) 0%, rgba(255,196,110,0.42) 38%, rgba(255,196,110,0.42) 62%, rgba(255,196,110,0) 100%);animation:filament 42s ease-in-out infinite;animation-delay:-14s"></div>
+    <div style="position:absolute;left:36%;top:56%;width:min(40vw,500px);height:1.5px;--r:-6deg;transform:translate(-50%,-50%) rotate(-6deg);mix-blend-mode:screen;filter:blur(1.2px);background:linear-gradient(90deg, rgba(64,236,212,0) 0%, rgba(64,236,212,0.34) 38%, rgba(64,236,212,0.34) 62%, rgba(64,236,212,0) 100%);animation:filament 50s ease-in-out infinite;animation-delay:-5s"></div>
+
+    <div style="position:absolute;left:16%;top:86%;width:min(78vw,900px);aspect-ratio:1.3/1;transform:translate(-50%,-50%)">
+      <div style="position:absolute;inset:0;border-radius:50%;mix-blend-mode:screen;filter:blur(60px);background:radial-gradient(circle at 50% 50%, rgba(64,236,212,1) 0%, rgba(64,236,212,1) 30%, rgba(64,236,212,0.50) 54%, rgba(64,236,212,0) 78%);animation:auroraC 40s ease-in-out infinite"></div>
+    </div>
+    <div style="position:absolute;left:40%;top:92%;width:min(62vw,740px);aspect-ratio:1.2/1;transform:translate(-50%,-50%)">
+      <div style="position:absolute;inset:0;border-radius:50%;mix-blend-mode:screen;filter:blur(54px);background:radial-gradient(circle at 50% 50%, rgba(255,158,66,0.85) 0%, rgba(255,158,66,0.85) 30%, rgba(255,158,66,0.42) 54%, rgba(255,158,66,0) 78%);animation:auroraA 47s ease-in-out infinite"></div>
+    </div>
+    <div style="position:absolute;left:4%;top:80%;width:min(46vw,560px);aspect-ratio:1.1/1;transform:translate(-50%,-50%)">
+      <div style="position:absolute;inset:0;border-radius:50%;mix-blend-mode:screen;filter:blur(50px);background:radial-gradient(circle at 50% 50%, rgba(255,196,110,0.6) 0%, rgba(255,196,110,0.6) 30%, rgba(255,196,110,0.30) 54%, rgba(255,196,110,0) 78%);animation:auroraB 55s ease-in-out infinite"></div>
+    </div>
+    <div style="position:absolute;left:30%;top:84%;width:min(40vw,480px);aspect-ratio:1.1/1;transform:translate(-50%,-50%)">
+      <div style="position:absolute;inset:0;border-radius:50%;mix-blend-mode:screen;filter:blur(48px);background:radial-gradient(circle at 50% 50%, rgba(255,86,178,0.52) 0%, rgba(255,86,178,0.52) 30%, rgba(255,86,178,0.26) 54%, rgba(255,86,178,0) 78%);animation:auroraC 51s ease-in-out infinite"></div>
+    </div>
+    <div style="position:absolute;left:26%;top:88%;width:min(54vw,660px);height:1.5px;--r:6deg;transform:translate(-50%,-50%) rotate(6deg);mix-blend-mode:screen;filter:blur(1.2px);background:linear-gradient(90deg, rgba(255,196,110,0) 0%, rgba(255,196,110,0.48) 38%, rgba(255,196,110,0.48) 62%, rgba(255,196,110,0) 100%);animation:filament 44s ease-in-out infinite;animation-delay:-20s"></div>
+    <div style="position:absolute;left:18%;top:93%;width:min(42vw,520px);height:1.5px;--r:-5deg;transform:translate(-50%,-50%) rotate(-5deg);mix-blend-mode:screen;filter:blur(1.2px);background:linear-gradient(90deg, rgba(64,236,212,0) 0%, rgba(64,236,212,0.36) 38%, rgba(64,236,212,0.36) 62%, rgba(64,236,212,0) 100%);animation:filament 52s ease-in-out infinite;animation-delay:-11s"></div>
   </div>
 
-  <header>
-    <div class="wrap">
-      <a class="back" href="../index.html">&larr; Kristína Magyarová</a>
-      <a class="brand" href="../index.html">Portfolio overview</a>
+  <header style="position:sticky;top:0;z-index:30;background:rgba(7,8,11,0.6);backdrop-filter:blur(16px)">
+    <div style="max-width:1160px;margin:0 auto;padding:15px clamp(20px,5vw,56px);display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <a href="../index.html" style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.02em">← back to overview</a>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.09em;text-transform:uppercase;color:#B4AFBB">Eval case study</span>
     </div>
   </header>
 
-  <div class="masthead">
-    <div class="masthead-in wrap">
-      <p class="eyebrow"><span class="ln"></span>Eval case study &middot; built with n8n &middot; July 2026</p>
-      <h1>The eval said 0.96. The product was dropping every number in the story.</h1>
-      <p class="standfirst">I built an evaluation layer for an LLM newsletter digest - hand-labelled golden set, an LLM judge validated blind against my own labels, coverage tracked across runs. The baseline came back at 0.96, which turned out to be a true measurement of a system that doesn't exist.</p>
-      <div class="byline">
-        <span class="name">Kristína Magyarová</span>
-        <span class="dot">&middot;</span>
-        <span>Senior Product Manager</span>
-        <span class="dot">&middot;</span>
-        <a href="https://linkedin.com/in/kristymagyarova">linkedin.com/in/kristymagyarova</a>
-      </div>
+  <section id="top" style="position:relative;z-index:1">
+    <div style="position:absolute;inset:0;pointer-events:none">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse 88% 94% at 30% 46%, rgba(7,8,11,0.9) 0%, rgba(7,8,11,0.84) 44%, rgba(7,8,11,0.52) 68%, rgba(7,8,11,0) 88%);-webkit-mask-image:linear-gradient(to bottom, #000 0%, #000 68%, transparent 100%);mask-image:linear-gradient(to bottom, #000 0%, #000 68%, transparent 100%)"></div>
     </div>
-  </div>
-</div>
-
-<div class="statband">
-  <div class="wrap">
-    <div class="statgrid">
-      <div class="stat"><b>0.935</b><span>Baseline coverage, mean of 4</span></div>
-      <div class="stat"><b>&plusmn;0.04</b><span>Measured noise floor</span></div>
-      <div class="stat"><b>24</b><span>Judge verdicts checked by hand</span></div>
-      <div class="stat"><b>6&times;</b><span>Gap vs. shipped output</span></div>
-    </div>
-  </div>
-</div>
-
-<div class="wrap">
-<div class="layout">
-
-  <aside class="side">
-    <dl>
-      <dt>the system</dt>
-      <dd>A scheduled n8n workflow reads four AI/tech feeds each weekday morning, Claude writes a short digest of each story, and it lands in my inbox at 08:00.</dd>
-
-      <dt>the question</dt>
-      <dd>The digest looked fine. "Looked fine" is not a quality claim - so what number would I defend it with, and how would I know that number wasn't lying to me?</dd>
-
-      <dt>done this before</dt>
-      <dd>Back in 2023 I had already run a version of this in client work, without calling it an eval: scoring a legal AI chatbot's answers against the client's historical responses and averaging across a sample. This is the same discipline, with the loop closed and the judge itself checked.</dd>
-
-      <dt>stack</dt>
-      <dd>
-        <ul>
-          <li><span class="k">Orchestration</span> n8n</li>
-          <li><span class="k">Eval</span> native evaluation nodes</li>
-          <li><span class="k">Dataset</span> Google Sheets</li>
-          <li><span class="k">Model</span> Claude Sonnet 4.5</li>
-          <li><span class="k">Judge</span> same model, temp 0</li>
-        </ul>
-      </dd>
-
-      <dt>dataset</dt>
-      <dd>6 articles &middot; 24 atomic must-include facts &middot; labelled by hand, from full source text</dd>
-
-      <dt>effort</dt>
-      <dd>Four evenings, start to finish - including learning the tooling</dd>
-    </dl>
-  </aside>
-
-  <main class="main">
-
-    <section>
-      <h2>what I found</h2><div class="h2rule"></div>
-      <div class="finding">
-        <b>The eval was scoring an easier task than the one production runs.</b>
-        <span>The golden set fed the model full articles. Production truncated each one to 600 characters of RSS snippet. Same article, same prompt, same model - coverage 1.00 in the eval, roughly 0.17 in the email that actually shipped.</span>
-      </div>
-      <div class="finding">
-        <b>Same input, same prompt - different output.</b>
-        <span>One run named five malware-laden games; the next named three. That single item moved coverage 1.00 &rarr; 0.83 with nothing changed.</span>
-      </div>
-      <div class="finding">
-        <b>The noise floor is &plusmn;0.04, so most "improvements" would have been imaginary.</b>
-        <span>Four identical runs returned 0.96 / 0.93 / 0.93 / 0.92. Any prompt change smaller than that isn't a result - and it costs four clicks to know that.</span>
-      </div>
-    </section>
-
-    <section>
-      <h2>what gets measured</h2><div class="h2rule"></div>
-      <p><strong>Coverage</strong> - of the facts I hand-labelled as essential to a story, how many did the digest actually convey?</p>
-      <p>Two design decisions I'd defend:</p>
-      <p><strong>Coverage is a checklist, not a rating.</strong> I don't ask the judge to score quality 1-5; that number drifts between runs and can't be checked against a human. It gets 3-6 pre-labelled atomic facts per article and returns present or absent for each, <em>with a quote from the digest as evidence</em>. If it can't quote it, it's absent. Binary, auditable, and directly comparable to my own judgement.</p>
-      <p><strong>Partial counts as absent.</strong> If the label reads "~8,000 victims" and the digest says "thousands of victims", that's a miss - the number was the news. Without this rule the judge waves through exactly the failure mode I care about.</p>
-      <figure>
-        <img src="screenshots/05-judge-output.png" alt="Judge output: per-item present/absent verdicts with an evidence quote for each">
-        <figcaption>The judge returns a verdict per labelled fact, each backed by an exact quote from the digest.</figcaption>
-      </figure>
-    </section>
-
-    <section>
-      <h2>the golden set</h2><div class="h2rule"></div>
-      <p>Six articles, 24 atomic must-include facts, labelled by hand. Small - see limitations. Three rules I only arrived at by getting them wrong first:</p>
-      <ul class="list">
-        <li><strong>One fact per item.</strong> My first label read <code>Zyaire Wilkins, 21, Florida student, arrested by FBI</code> - four facts in one checkbox. The judge marked it present on the strength of the name and age; "student" appears nowhere in the digest. A compound item can't be half-ticked, so the judge defaults to lenient.</li>
-        <li><strong>Label from the full source, not the snippet.</strong> One label was written against a truncated excerpt, which made a correctly-reported figure look invented. A golden set is only as good as the text it was written from.</li>
-        <li><strong>Don't label what isn't there.</strong> Twice I caught myself writing a plausible fact the source never stated - the same failure I'm asking the judge to catch in the model.</li>
-      </ul>
-      <figure>
-        <img src="screenshots/04-golden-set.png" alt="Golden set spreadsheet with source text, must-include facts and results written back by n8n">
-        <figcaption>The dataset in Google Sheets. n8n reads it row by row and writes the digest, coverage and full judge verdict back into the same sheet.</figcaption>
-      </figure>
-    </section>
-
-    <section>
-      <h2>validating the judge</h2><div class="h2rule"></div>
-      <p>An unvalidated judge is a random number generator with good manners. Before trusting a single number it produced, I graded all 24 items myself - <strong>blind</strong>, with the judge's column hidden in the sheet until mine was finished - and compared.</p>
-      <div class="tablewrap">
-        <table>
-          <thead><tr><th>Article</th><th class="num">Items</th><th>My verdicts</th><th>Judge</th><th>Agreement</th></tr></thead>
-          <tbody>
-            <tr><td>nl_001</td><td class="num">3</td><td>1 1 1</td><td>1 1 1</td><td class="yes">3 / 3</td></tr>
-            <tr><td>nl_002</td><td class="num">3</td><td>1 1 1</td><td>1 1 1</td><td class="yes">3 / 3</td></tr>
-            <tr><td>nl_003</td><td class="num">4</td><td>1 1 <span class="no">0</span> 1</td><td>1 1 <span class="no">0</span> 1</td><td class="yes">4 / 4</td></tr>
-            <tr><td>nl_004</td><td class="num">4</td><td>1 1 1 1</td><td>1 1 1 1</td><td class="yes">4 / 4</td></tr>
-            <tr><td>nl_005</td><td class="num">4</td><td>1 1 1 1</td><td>1 1 1 1</td><td class="yes">4 / 4</td></tr>
-            <tr><td>nl_006</td><td class="num">6</td><td>1 <span class="no">0</span> 1 1 1 1</td><td>1 <span class="no">0</span> 1 1 1 1</td><td class="yes">6 / 6</td></tr>
-          </tbody>
-        </table>
-        Raw agreement 24/24 &middot; Cohen's &kappa; = 1.00
-      </div>
-      <p><strong>This is weaker than it looks, and I'd rather say so than oversell it.</strong> 22 of 24 items are "present", so a judge that answered "yes" to everything would still score 91.7% agreement. The test barely pressed on it. What it does establish is that we agree on both <em>negatives</em> - the two real misses - which is the direction that matters. To make this result mean something I need a golden set with more failure cases in it.</p>
-    </section>
-
-    <section>
-      <h2>finding 1 - measuring a system that doesn't exist</h2><div class="h2rule"></div>
-      <p>Baseline came back at 0.96. That felt too high, so I checked it against the digest that had actually been emailed that morning, on the same article.</p>
-      <div class="tablewrap">
-        <table>
-          <thead><tr><th>Labelled fact</th><th>Shipped email</th><th>Eval run</th></tr></thead>
-          <tbody>
-            <tr><td>~8,000 victims</td><td class="no">"thousands of victims"</td><td class="yes">present</td></tr>
-            <tr><td>at least $220,000 stolen</td><td class="no">"drained cryptocurrency"</td><td class="yes">present</td></tr>
-            <tr><td>~80 crypto wallets</td><td class="no">absent</td><td class="yes">present</td></tr>
-            <tr><td>five named games</td><td class="no">absent</td><td class="yes">present</td></tr>
-            <tr><td><strong>coverage</strong></td><td class="no"><strong>~0.17</strong></td><td class="yes"><strong>1.00</strong></td></tr>
-          </tbody>
-        </table>
-        Same article, same prompt, same model - scored twice.
-      </div>
-      <p>The cause was one line of preprocessing in the production workflow:</p>
-      <pre><code>.slice(0, 600)</code></pre>
-      <p>Production truncated each article to 600 characters of RSS snippet. The figures live further down the article - the model never received them. Meanwhile the golden set held the full text I'd pasted in by hand.</p>
-      <p>So the model wasn't dropping the numbers. <strong>It never had them.</strong></p>
-      <h3>The fix</h3>
-      <p>Production now fetches each article URL, strips the page to text, and passes 4,000 characters instead of 600. The next morning's digest - a different story, this one on US EV sales - carried "5.8% market share, 247,226 units, -20.5%, $7,500 tax credit": figures that sit well beyond the 600-character cutoff the old pipeline used.</p>
-      <p><strong>What I take from it:</strong> an offline eval is only as valid as its resemblance to the production path. Mine diverged at one line, and the divergence flattered the score by roughly six times.</p>
-      <figure>
-        <img src="screenshots/01-production-flow.png" alt="The production n8n workflow: schedule, four RSS reads, merge, article fetch, Claude, Gmail">
-        <figcaption>Production after the fix - the article fetch and text extraction now sit between the feed merge and the model.</figcaption>
-      </figure>
-    </section>
-
-    <section>
-      <h2>finding 2 - the same input doesn't give the same output</h2><div class="h2rule"></div>
-      <p>Re-running the eval unchanged, one digest named five games; the next named three. Coverage on that article moved 1.00 &rarr; 0.83. Nothing had changed - not the prompt, not the data, not the model.</p>
-      <p>This is ordinary sampling behaviour, but it has a blunt consequence for anyone reading a single eval score as truth: <strong>one run is one sample, not a measurement.</strong> Which leads directly to the next thing worth knowing.</p>
-    </section>
-
-    <section>
-      <h2>finding 3 - the noise floor</h2><div class="h2rule"></div>
-      <p>Four identical runs. No changes of any kind between them.</p>
-      <div class="noise">
-        <div class="noise-track">
-          <div class="noise-run" style="left:0%"><i>0.92</i></div>
-          <div class="noise-run" style="left:25%"><i>0.93 &times;2</i></div>
-          <div class="noise-run" style="left:100%"><i>0.96</i></div>
+    <div style="position:relative;max-width:1160px;margin:0 auto;padding:clamp(48px,7vw,104px) clamp(20px,5vw,56px) clamp(40px,5vw,72px);display:flex;flex-wrap:wrap;gap:clamp(40px,5vw,64px);align-items:center">
+      <div style="flex:1 1 440px;min-width:0">
+        <div data-reveal="" style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.13em;text-transform:uppercase;color:#4FB5AC;margin-bottom:clamp(22px,3.5vw,36px)">
+          eval case study · built with n8n · July 2026
         </div>
-        <div class="noise-scale"><span>0.92</span><span>mean 0.935 &middot; sd 0.017 &middot; range 0.04</span><span>0.96</span></div>
-        <p class="noise-note"><strong>Working rule:</strong> a difference below ~0.035 (2 sd) is not a result.</p>
+        <h1 data-reveal="" style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(31px,4.8vw,58px);line-height:1.08;letter-spacing:-0.018em;margin:0 0 clamp(18px,2.6vw,28px);max-width:17em;text-wrap:pretty">The eval said 0.96. <span style="color:#4FB5AC">The product was dropping every number in the story.</span></h1>
+        <p data-reveal="" style="font-size:clamp(16.5px,1.35vw,19px);line-height:1.75;color:#C7C3CD;max-width:64ch;margin:0;font-weight:300;text-wrap:pretty">I built an evaluation layer for an LLM newsletter digest - hand-labelled golden set, an LLM judge validated blind against my own labels, coverage tracked across runs. The baseline came back at 0.96, which turned out to be a true measurement of a system that doesn't exist.</p>
       </div>
-      <p>This is the cheapest useful number in the whole project - four clicks - and it's the one that prevents weeks spent tuning prompts against movement that was always going to happen anyway. It's also the answer to the first question anyone should ask about an A/B result: <em>how do you know that isn't noise?</em></p>
-      <figure>
-        <img src="screenshots/03-evaluations-runs.png" alt="n8n Evaluations tab showing coverage tracked across successive runs">
-        <figcaption>Runs tracked in n8n's Evaluations tab. Metrics are set by the workflow itself, so score history comes for free - no separate store.</figcaption>
-      </figure>
-    </section>
 
-    <section>
-      <h2>how it's wired</h2><div class="h2rule"></div>
-      <p>The eval is a second workflow, deliberately separate from production. It reads the golden set row by row, so every run scores the same frozen sample - otherwise a prompt change and a news cycle would move at the same time and neither could be blamed.</p>
-      <pre><code>When fetching a dataset row   -&gt; Google Sheets, one row per run
-  -&gt; HTTP Request                write the digest   (prompt under test)
-  -&gt; HTTP Request                judge the digest   (temp 0, JSON out)
-  -&gt; Code                        parse, score, fail loud on bad JSON
-  -&gt; Set Outputs                 write results back to the sheet
-  -&gt; Set Metrics                 track coverage across runs</code></pre>
-      <p>One detail worth naming: if the judge returns unparseable JSON, the workflow throws rather than recording a zero. A zero looks like a bad digest; it's actually a broken judge. Silently conflating the two would quietly poison every number downstream.</p>
-      <figure>
-        <img src="screenshots/02-eval-flow.png" alt="The eval workflow: dataset trigger, generate, judge, score, set outputs, set metrics">
-        <figcaption>Built on n8n's native evaluation nodes rather than a bespoke harness.</figcaption>
-      </figure>
-    </section>
+      <div data-reveal="" style="flex:1 1 380px;min-width:0;position:relative">
+        <div style="position:absolute;left:50%;top:50%;width:122%;aspect-ratio:1/1;transform:translate(-50%,-50%);pointer-events:none;mix-blend-mode:screen;filter:blur(46px);border-radius:50%;background:radial-gradient(circle at 46% 48%, rgba(255,86,178,0.38) 0%, rgba(255,86,178,0.18) 38%, rgba(64,236,212,0.14) 62%, rgba(64,236,212,0) 80%)"></div>
+        <div style="position:relative;border:1px solid rgba(236,234,230,0.16);border-radius:4px;padding:clamp(22px,2.8vw,32px);backdrop-filter:blur(26px) saturate(1.2) brightness(0.55);-webkit-backdrop-filter:blur(26px) saturate(1.2) brightness(0.55);background:linear-gradient(to bottom, rgba(236,234,230,0.06), rgba(236,234,230,0.02));box-shadow:0 30px 70px rgba(0,0,0,0.5)">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#B4AFBB;margin-bottom:clamp(18px,2.4vw,26px)">same article · same prompt · same model</div>
+          <div style="display:flex;flex-direction:column;gap:clamp(16px,2.2vw,22px)">
+            <div>
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:9px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.07em;text-transform:uppercase;color:#D6D2DC">scored in the eval</span>
+                <span style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(26px,3vw,34px);line-height:1;color:#4FB5AC">1.00</span>
+              </div>
+              <div style="height:6px;border-radius:3px;background:rgba(236,234,230,0.08);overflow:hidden">
+                <div style="width:100%;height:100%;border-radius:3px;background:linear-gradient(90deg, rgba(79,181,172,0.55), #4FB5AC)"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:9px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.07em;text-transform:uppercase;color:#D6D2DC">in the email that shipped</span>
+                <span style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(26px,3vw,34px);line-height:1;color:#FF7FC2">~0.17</span>
+              </div>
+              <div style="height:6px;border-radius:3px;background:rgba(236,234,230,0.08);overflow:hidden">
+                <div style="width:17%;height:100%;border-radius:3px;background:linear-gradient(90deg, rgba(255,86,178,0.55), #FF7FC2)"></div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:clamp(20px,2.6vw,28px);padding-top:clamp(16px,2vw,20px);border-top:1px solid rgba(236,234,230,0.12);display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.07em;text-transform:uppercase;color:#B4AFBB">the cause</span>
+            <code style="font-family:'JetBrains Mono',monospace;font-size:13.5px;color:#7FD8CF;background:rgba(79,181,172,0.1);border:1px solid rgba(79,181,172,0.22);border-radius:3px;padding:3px 9px">.slice(0, 600)</code>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <section>
-      <h2>limitations</h2><div class="h2rule"></div>
-      <p>Stated plainly, because an eval that hides these isn't an eval.</p>
-      <ul class="list">
-        <li><strong>n = 6 articles, 24 items.</strong> Enough to build and validate the mechanism; not enough for confident deltas.</li>
-        <li><strong>Class imbalance 22:2</strong> makes &kappa; = 1.00 far less impressive than the number suggests.</li>
-        <li><strong>Single labeller.</strong> No second annotator, so no measure of how much my own labels drift.</li>
-        <li><strong>Coverage only.</strong> It checks that required facts are present and is structurally blind to invented ones - a digest carrying every labelled fact <em>plus</em> a fabricated sentence would still score 1.00.</li>
-        <li><strong>Four runs</strong> is a thin basis for a noise estimate. The &plusmn;0.04 is indicative, not precise.</li>
-        <li><strong>No A/B yet</strong> - and at this sample size, against this noise floor, a small prompt delta would be unresolvable anyway.</li>
-      </ul>
-    </section>
+  <section style="position:relative;z-index:1;isolation:isolate">
+    <div style="position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);width:min(calc(100% - 2*clamp(20px,5vw,56px)),1160px);pointer-events:none;border:1px solid rgba(236,234,230,0.16);border-radius:3px;backdrop-filter:blur(34px) saturate(1.25) brightness(0.52);-webkit-backdrop-filter:blur(34px) saturate(1.25) brightness(0.52);background:linear-gradient(to bottom, rgba(236,234,230,0.05), rgba(236,234,230,0.02))"></div>
+    <div style="position:relative;z-index:1;max-width:1160px;margin:0 auto;padding:0 calc(clamp(20px,5vw,56px) + 28px)">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+        <div data-reveal="" style="padding:clamp(26px,3.4vw,40px) 24px clamp(26px,3.4vw,40px) 0;border-right:1px solid rgba(236,234,230,0.09)">
+          <div style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(36px,4.4vw,54px);line-height:1;color:#4FB5AC">0.935</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#B4AFBB;margin-top:10px">Baseline coverage, mean of 4</div>
+        </div>
+        <div data-reveal="" style="padding:clamp(26px,3.4vw,40px) 24px clamp(26px,3.4vw,40px) clamp(16px,2vw,28px);border-right:1px solid rgba(236,234,230,0.09)">
+          <div style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(36px,4.4vw,54px);line-height:1;color:#4FB5AC">±0.04</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#B4AFBB;margin-top:10px">Measured noise floor</div>
+        </div>
+        <div data-reveal="" style="padding:clamp(26px,3.4vw,40px) 24px clamp(26px,3.4vw,40px) clamp(16px,2vw,28px);border-right:1px solid rgba(236,234,230,0.09)">
+          <div data-count="24" style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(36px,4.4vw,54px);line-height:1;color:#4FB5AC">24</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#B4AFBB;margin-top:10px">Judge verdicts checked by hand</div>
+        </div>
+        <div data-reveal="" style="padding:clamp(26px,3.4vw,40px) 0 clamp(26px,3.4vw,40px) clamp(16px,2vw,28px)">
+          <div style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(36px,4.4vw,54px);line-height:1;color:#4FB5AC">6×</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#B4AFBB;margin-top:10px">Gap vs. shipped output</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <section>
-      <h2>what six articles bought</h2><div class="h2rule"></div>
-      <p>The sample is small, and I'd rather be the one to say so. But the three things this surfaced don't depend on sample size, and that's the argument for building the smallest version first.</p>
-      <p><strong>A truncation bug, a non-deterministic model and a noise floor look the same at n=6 as at n=600.</strong> The 600-character cutoff was silently costing the product every verifiable number in a story, and it had been doing that in my inbox every weekday morning without me noticing. Six labelled articles found it in an evening. Six hundred would have found the same thing, later and at more cost.</p>
-      <p><strong>The mechanism now exists and has been checked.</strong> Dataset, judge, scoring, write-back, tracked metrics - and, importantly, a judge whose verdicts I've compared against my own rather than assumed. Growing this is labelling work now, not engineering work.</p>
-      <p><strong>The useful output was never 0.935.</strong> It was finding out that my first number described a system that doesn't exist, and that my second one moves by &plusmn;0.04 on its own. At this stage an eval's job isn't to certify that the product is good - it's to tell you whether you can trust your own numbers yet. Mine couldn't, twice. Now it can, within a range I can state.</p>
-      <p>The alternative was continuing to ship something that looked fine.</p>
-    </section>
+  <div style="position:relative;z-index:1;max-width:1160px;margin:0 auto;padding:clamp(40px,5.5vw,80px) clamp(20px,5vw,56px);display:flex;flex-wrap:wrap;gap:clamp(32px,5vw,72px);align-items:flex-start">
 
-    <section>
-      <h2>what I'd do next</h2><div class="h2rule"></div>
-      <ul class="list">
-        <li><strong>Faithfulness</strong> - check each claim in the digest against its source. It needs no golden labels, because the source article <em>is</em> the reference, which means unlike coverage it can run on live production traffic.</li>
-        <li><strong>A guardrail on faithfulness</strong>, thresholded off the observed baseline distribution rather than a hand-picked number: block the digest and alert instead of shipping a fabricated claim.</li>
-        <li><strong>Grow the golden set toward failure cases</strong> - paywalled sources, multi-story roundups, corrections, opinion pieces with no hard facts.</li>
-        <li><strong>Cost and latency as first-class metrics.</strong> An eval that ignores them will happily recommend a prompt that triples the bill.</li>
-      </ul>
-    </section>
+    <aside style="flex:1 1 250px;min-width:0;max-width:320px;display:flex;flex-direction:column;gap:clamp(20px,2.4vw,26px)">
+      <div data-reveal="">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;margin-bottom:9px">the system</div>
+        <p style="margin:0;font-size:15.5px;line-height:1.78;color:#C7C3CD;font-weight:300;text-wrap:pretty">A scheduled n8n workflow reads four AI/tech feeds each weekday morning, Claude writes a short digest of each story, and it lands in my inbox at 08:00.</p>
+      </div>
+      <div data-reveal="" style="border-top:1px solid rgba(236,234,230,0.11);padding-top:clamp(18px,2.2vw,24px)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;margin-bottom:9px">the question</div>
+        <p style="margin:0;font-size:15.5px;line-height:1.78;color:#C7C3CD;font-weight:300;text-wrap:pretty">The digest looked fine. "Looked fine" is not a quality claim - so what number would I defend it with, and how would I know that number wasn't lying to me?</p>
+      </div>
+      <div data-reveal="" style="border-top:1px solid rgba(236,234,230,0.11);padding-top:clamp(18px,2.2vw,24px)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;margin-bottom:9px">done this before</div>
+        <p style="margin:0;font-size:15.5px;line-height:1.78;color:#C7C3CD;font-weight:300;text-wrap:pretty">Back in 2023 I had already run a version of this in client work, without calling it an eval: scoring a legal AI chatbot's answers against the client's historical responses and averaging across a sample. This is the same discipline, with the loop closed and the judge itself checked.</p>
+      </div>
+      <div data-reveal="" style="border-top:1px solid rgba(236,234,230,0.11);padding-top:clamp(18px,2.2vw,24px)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;margin-bottom:9px">stack</div>
+        <div style="display:flex;flex-direction:column;gap:7px;font-size:15.5px;line-height:1.5;color:#C7C3CD;font-weight:300">
+          <div><span style="color:#ECEAE6">Orchestration</span> n8n</div>
+          <div><span style="color:#ECEAE6">Eval</span> native evaluation nodes</div>
+          <div><span style="color:#ECEAE6">Dataset</span> Google Sheets</div>
+          <div><span style="color:#ECEAE6">Model</span> Claude Sonnet 4.5</div>
+          <div><span style="color:#ECEAE6">Judge</span> same model, temp 0</div>
+        </div>
+      </div>
+      <div data-reveal="" style="border-top:1px solid rgba(236,234,230,0.11);padding-top:clamp(18px,2.2vw,24px)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;margin-bottom:9px">dataset</div>
+        <p style="margin:0;font-size:15.5px;line-height:1.78;color:#C7C3CD;font-weight:300;text-wrap:pretty">6 articles · 24 atomic must-include facts · labelled by hand, from full source text</p>
+      </div>
+      <div data-reveal="" style="border-top:1px solid rgba(236,234,230,0.11);padding-top:clamp(18px,2.2vw,24px)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;margin-bottom:9px">effort</div>
+        <p style="margin:0;font-size:15.5px;line-height:1.78;color:#C7C3CD;font-weight:300;text-wrap:pretty">Four evenings, start to finish - including learning the tooling. The workflows, the golden set and the judge prompts are the boring part - the useful part was checking whether the number I'd produced meant anything, and finding out twice that it didn't.</p>
+      </div>
+    </aside>
 
-  </main>
-</div>
-</div>
+    <main style="flex:1 1 520px;min-width:0;display:flex;flex-direction:column;gap:clamp(36px,4.5vw,64px)">
 
-<footer>
-  <div class="wrap">
-    <p>Built across four evenings, including learning the tooling. The workflows, the golden set and the judge prompts are the boring part - the useful part was checking whether the number I'd produced meant anything, and finding out twice that it didn't.</p>
-    <p class="contact"><span class="name">Kristína Magyarová</span> &middot; Senior Product Manager &middot; <a href="https://linkedin.com/in/kristymagyarova">linkedin.com/in/kristymagyarova</a></p>
+      <section data-reveal="">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">01</div>
+        <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 20px;text-wrap:pretty">what I found</h2>
+        <div style="display:flex;flex-direction:column;gap:clamp(18px,2.4vw,26px)">
+          <div style="border-left:1px solid rgba(79,181,172,0.5);padding-left:18px">
+            <p style="margin:0 0 8px;font-family:Newsreader,Georgia,serif;font-size:clamp(18px,1.9vw,22px);line-height:1.4;color:#ECEAE6;font-weight:400">The eval was scoring an easier task than the one production runs.</p>
+            <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">The golden set fed the model full articles. Production truncated each one to 600 characters of RSS snippet. Same article, same prompt, same model - coverage 1.00 in the eval, roughly 0.17 in the email that actually shipped.</p>
+          </div>
+          <div style="border-left:1px solid rgba(79,181,172,0.5);padding-left:18px">
+            <p style="margin:0 0 8px;font-family:Newsreader,Georgia,serif;font-size:clamp(18px,1.9vw,22px);line-height:1.4;color:#ECEAE6;font-weight:400">Same input, same prompt - different output.</p>
+            <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">One run named five malware-laden games; the next named three. That single item moved coverage 1.00 → 0.83 with nothing changed.</p>
+          </div>
+          <div style="border-left:1px solid rgba(79,181,172,0.5);padding-left:18px">
+            <p style="margin:0 0 8px;font-family:Newsreader,Georgia,serif;font-size:clamp(18px,1.9vw,22px);line-height:1.4;color:#ECEAE6;font-weight:400">The noise floor is ±0.04, so most "improvements" would have been imaginary.</p>
+            <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Four identical runs returned 0.96 / 0.93 / 0.93 / 0.92. Any prompt change smaller than that isn't a result - and it costs four clicks to know that.</p>
+          </div>
+        </div>
+      </section>
+
+      <section data-reveal="">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">02</div>
+        <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">what gets measured</h2>
+        <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">Coverage</strong> - of the facts I hand-labelled as essential to a story, how many did the digest actually convey?</p>
+        <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Two design decisions I'd defend:</p>
+        <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">Coverage is a checklist, not a rating.</strong> I don't ask the judge to score quality 1-5; that number drifts between runs and can't be checked against a human. It gets 3-6 pre-labelled atomic facts per article and returns present or absent for each, <em>with a quote from the digest as evidence</em>. If it can't quote it, it's absent. Binary, auditable, and directly comparable to my own judgement.</p>
+        <p style="margin:0 0 clamp(22px,3vw,30px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">Partial counts as absent.</strong> If the label reads "~8,000 victims" and the digest says "thousands of victims", that's a miss - the number was the news. Without this rule the judge waves through exactly the failure mode I care about.</p>
+        <div style="border:1px solid rgba(236,234,230,0.14);border-radius:6px;overflow:hidden;background:#11141A"><img src="screenshots/05-judge-output.png" alt="Judge output: per-item present/absent verdicts with an evidence quote for each" style="display:block;width:100%"></div>
+        <p style="margin:12px 0 0;font-size:14.5px;line-height:1.7;color:#B4AFBB;font-style:italic;font-weight:300;max-width:60ch">The judge returns a verdict per labelled fact, each backed by an exact quote from the digest.</p>
+      </section>
+
+      <section data-reveal="">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">03</div>
+        <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">the golden set</h2>
+        <p style="margin:0 0 18px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Six articles, 24 atomic must-include facts, labelled by hand. Small - see limitations. Three rules I only arrived at by getting them wrong first:</p>
+        <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:clamp(22px,3vw,30px)">
+          <div style="display:flex;gap:14px"><span style="color:#4FB5AC;flex:0 0 auto">–</span><p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:68ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">One fact per item.</strong> My first label read <code style="font-family:'JetBrains Mono',monospace;font-size:14.5px;color:#7FD8CF;background:rgba(79,181,172,0.1);border-radius:3px;padding:2px 7px">Zyaire Wilkins, 21, Florida student, arrested by FBI</code> - four facts in one checkbox. The judge marked it present on the strength of the name and age; "student" appears nowhere in the digest. A compound item can't be half-ticked, so the judge defaults to lenient.</p></div>
+          <div style="display:flex;gap:14px"><span style="color:#4FB5AC;flex:0 0 auto">–</span><p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:68ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">Label from the full source, not the snippet.</strong> One label was written against a truncated excerpt, which made a correctly-reported figure look invented. A golden set is only as good as the text it was written from.</p></div>
+          <div style="display:flex;gap:14px"><span style="color:#4FB5AC;flex:0 0 auto">–</span><p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:68ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">Don't label what isn't there.</strong> Twice I caught myself writing a plausible fact the source never stated - the same failure I'm asking the judge to catch in the model.</p></div>
+        </div>
+        <div style="border:1px solid rgba(236,234,230,0.14);border-radius:6px;overflow:hidden;background:#11141A"><img src="screenshots/04-golden-set.png" alt="Golden set spreadsheet with source text, must-include facts and results written back by n8n" style="display:block;width:100%"></div>
+        <p style="margin:12px 0 0;font-size:14.5px;line-height:1.7;color:#B4AFBB;font-style:italic;font-weight:300;max-width:60ch">The dataset in Google Sheets. n8n reads it row by row and writes the digest, coverage and full judge verdict back into the same sheet.</p>
+      </section>
+
+      <section data-reveal="">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">04</div>
+        <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">validating the judge</h2>
+        <p style="margin:0 0 clamp(20px,2.6vw,28px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">An unvalidated judge is a random number generator with good manners. Before trusting a single number it produced, I graded all 24 items myself - <strong style="color:#ECEAE6;font-weight:600">blind</strong>, with the judge's column hidden in the sheet until mine was finished - and compared.</p>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:15.5px;color:#C7C3CD;font-weight:300;min-width:460px">
+            <thead>
+              <tr style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#B4AFBB">
+                <th style="text-align:left;padding:0 12px 12px 0;font-weight:500">Article</th>
+                <th style="text-align:right;padding:0 12px 12px;font-weight:500">Items</th>
+                <th style="text-align:left;padding:0 12px 12px;font-weight:500">My verdicts</th>
+                <th style="text-align:left;padding:0 12px 12px;font-weight:500">Judge</th>
+                <th style="text-align:right;padding:0 0 12px 12px;font-weight:500">Agreement</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-top:1px solid rgba(236,234,230,0.1)"><td style="padding:14px 12px 14px 0">nl_001</td><td style="text-align:right;padding:14px 12px">3</td><td style="padding:14px 12px;font-family:'JetBrains Mono',monospace">1 1 1</td><td style="padding:14px 12px;font-family:'JetBrains Mono',monospace">1 1 1</td><td style="text-align:right;padding:14px 0 14px 12px;color:#4FB5AC;font-family:'JetBrains Mono',monospace">3 / 3</td></tr>
+              <tr style="border-top:1px solid rgba(236,234,230,0.1)"><td style="padding:14px 12px 14px 0">nl_002</td><td style="text-align:right;padding:14px 12px">3</td><td style="padding:14px 12px;font-family:'JetBrains Mono',monospace">1 1 1</td><td style="padding:14px 12px;font-family:'JetBrains Mono',monospace">1 1 1</td><td style="text-align:right;padding:14px 0 14px 12px;color:#4FB5AC;font-family:'JetBrains Mono',monospace">3 / 3</td></tr>
+              <tr style="border-top:1px solid rgba(236,234,230,0.1)"><td style="padding:14px 12px 14px 0">nl_003</td><td style="text-align:right;padding:14px 12px">4</td><td style="padding:14px 12px;font-family:'JetBrains Mono',monospace">1 1 <span style="color:#8D8895">0</span> 1</td><td style="padding:14px 12px;font-family:'JetBrains Mono',monospace">1 1 <span style="color:#8D8895">0</span> 1</td><td style="text-align:right;padding:14px 0 14px 12px;color:#4FB5AC;font-family:'JetBrains Mono',monospace">4 / 4</td></tr>
+              <tr style="border-top:1px solid rgba(236,234,230,0.1)"><td style="padding:14px 12px 14px 0">nl_004</td><td style="text-align:right;padding:14px 12px">4</td><td style="padding:14px 12px;font-family:'JetBrains Mono',monospace">1 1 1 1</td><td style="padding:14px 12px;font-family:'JetBrains Mono',monospace">1 1 1 1</td><td style="text-align:right;padding:14px 0 14px 12px;color:#4FB5AC;font-family:'JetBrains Mono',monospace">4 / 4</td></tr>
+              <tr style="border-top:1px solid rgba(236,234,230,0.1)"><td style="padding:14px 12px 14px 0">nl_005</td><td style="text-align:right;padding:14px 12px">4</td><td style="padding:14px 12px;font-family:'JetBrains Mono',monospace">1 1 1 1</td><td style="padding:14px 12px;font-family:'JetBrains Mono',monospace">1 1 1 1</td><td style="text-align:right;padding:14px 0 14px 12px;color:#4FB5AC;font-family:'JetBrains Mono',monospace">4 / 4</td></tr>
+              <tr style="border-top:1px solid rgba(236,234,230,0.1);border-bottom:1px solid rgba(236,234,230,0.1)"><td style="padding:14px 12px 14px 0">nl_006</td><td style="text-align:right;padding:14px 12px">6</td><td style="padding:14px 12px;font-family:'JetBrains Mono',monospace">1 <span style="color:#8D8895">0</span> 1 1 1 1</td><td style="padding:14px 12px;font-family:'JetBrains Mono',monospace">1 <span style="color:#8D8895">0</span> 1 1 1 1</td><td style="text-align:right;padding:14px 0 14px 12px;color:#4FB5AC;font-family:'JetBrains Mono',monospace">6 / 6</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin:14px 0 18px;font-size:15.5px;line-height:1.7;color:#C7C3CD;font-weight:300">Raw agreement 24/24 · Cohen's κ = 1.00</p>
+        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">This is weaker than it looks, and I'd rather say so than oversell it.</strong> 22 of 24 items are "present", so a judge that answered "yes" to everything would still score 91.7% agreement. The test barely pressed on it. What it does establish is that we agree on both <em>negatives</em> - the two real misses - which is the direction that matters. To make this result mean something I need a golden set with more failure cases in it.</p>
+      </section>
+
+      <section data-reveal="">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">05</div>
+        <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">finding 1 - measuring a system that doesn't exist</h2>
+        <p style="margin:0 0 clamp(20px,2.6vw,28px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Baseline came back at 0.96. That felt too high, so I checked it against the digest that had actually been emailed that morning, on the same article.</p>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:15.5px;color:#C7C3CD;font-weight:300;min-width:440px">
+            <thead>
+              <tr style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#B4AFBB">
+                <th style="text-align:left;padding:0 12px 12px 0;font-weight:500">Labelled fact</th>
+                <th style="text-align:left;padding:0 12px 12px;font-weight:500">Shipped email</th>
+                <th style="text-align:right;padding:0 0 12px 12px;font-weight:500">Eval run</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-top:1px solid rgba(236,234,230,0.1)"><td style="padding:14px 12px 14px 0">~8,000 victims</td><td style="padding:14px 12px;color:#8D8895">"thousands of victims"</td><td style="text-align:right;padding:14px 0 14px 12px;color:#4FB5AC">present</td></tr>
+              <tr style="border-top:1px solid rgba(236,234,230,0.1)"><td style="padding:14px 12px 14px 0">at least $220,000 stolen</td><td style="padding:14px 12px;color:#8D8895">"drained cryptocurrency"</td><td style="text-align:right;padding:14px 0 14px 12px;color:#4FB5AC">present</td></tr>
+              <tr style="border-top:1px solid rgba(236,234,230,0.1)"><td style="padding:14px 12px 14px 0">~80 crypto wallets</td><td style="padding:14px 12px;color:#8D8895">absent</td><td style="text-align:right;padding:14px 0 14px 12px;color:#4FB5AC">present</td></tr>
+              <tr style="border-top:1px solid rgba(236,234,230,0.1)"><td style="padding:14px 12px 14px 0">five named games</td><td style="padding:14px 12px;color:#8D8895">absent</td><td style="text-align:right;padding:14px 0 14px 12px;color:#4FB5AC">present</td></tr>
+              <tr style="border-top:1px solid rgba(236,234,230,0.1);border-bottom:1px solid rgba(236,234,230,0.1)"><td style="padding:14px 12px 14px 0;color:#ECEAE6;font-weight:500">coverage</td><td style="padding:14px 12px;color:#ECEAE6;font-weight:500">~0.17</td><td style="text-align:right;padding:14px 0 14px 12px;color:#ECEAE6;font-weight:500">1.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin:16px 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch">Same article, same prompt, same model - scored twice.</p>
+        <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch">The cause was one line of preprocessing in the production workflow:</p>
+        <div style="border:1px solid rgba(236,234,230,0.12);border-radius:3px;background:rgba(17,20,26,0.75);padding:clamp(18px,2.4vw,24px) clamp(18px,2.4vw,26px);margin-bottom:18px;font-family:'JetBrains Mono',monospace;font-size:15px;color:#7FD8CF">.slice(0, 600)</div>
+        <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Production truncated each article to 600 characters of RSS snippet. The figures live further down the article - the model never received them. Meanwhile the golden set held the full text I'd pasted in by hand.</p>
+        <p style="margin:0 0 clamp(22px,3vw,30px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">So the model wasn't dropping the numbers. <strong style="color:#ECEAE6;font-weight:600">It never had them.</strong></p>
+        <h3 style="font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(19px,2vw,24px);line-height:1.3;margin:0 0 14px;color:#ECEAE6">The fix</h3>
+        <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Production now fetches each article URL, strips the page to text, and passes 4,000 characters instead of 600. The next morning's digest - a different story, this one on US EV sales - carried "5.8% market share, 247,226 units, -20.5%, $7,500 tax credit": figures that sit well beyond the 600-character cutoff the old pipeline used.</p>
+        <p style="margin:0 0 clamp(22px,3vw,30px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">What I take from it:</strong> an offline eval is only as valid as its resemblance to the production path. Mine diverged at one line, and the divergence flattered the score by roughly six times.</p>
+        <div style="border:1px solid rgba(236,234,230,0.14);border-radius:6px;overflow:hidden;background:#11141A"><img src="screenshots/01-production-flow.png" alt="The production n8n workflow: schedule, four RSS reads, merge, article fetch, Claude, Gmail" style="display:block;width:100%"></div>
+        <p style="margin:12px 0 0;font-size:14.5px;line-height:1.7;color:#B4AFBB;font-style:italic;font-weight:300;max-width:60ch">Production after the fix - the article fetch and text extraction now sit between the feed merge and the model.</p>
+      </section>
+
+      <section data-reveal="">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">06</div>
+        <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">finding 2 - the same input doesn't give the same output</h2>
+        <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Re-running the eval unchanged, one digest named five games; the next named three. Coverage on that article moved 1.00 → 0.83. Nothing had changed - not the prompt, not the data, not the model.</p>
+        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">This is ordinary sampling behaviour, but it has a blunt consequence for anyone reading a single eval score as truth: <strong style="color:#ECEAE6;font-weight:600">one run is one sample, not a measurement.</strong> Which leads directly to the next thing worth knowing.</p>
+      </section>
+
+      <section data-reveal="">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">07</div>
+        <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">finding 3 - the noise floor</h2>
+        <p style="margin:0 0 clamp(20px,2.6vw,28px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch">Four identical runs. No changes of any kind between them.</p>
+        <div style="border:1px solid rgba(236,234,230,0.14);border-radius:4px;background:rgba(17,20,26,0.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:clamp(22px,3vw,32px) clamp(20px,3vw,32px) clamp(18px,2.4vw,24px)">
+          <div style="position:relative;height:74px">
+            <div style="position:absolute;left:0;right:0;top:38px;height:1px;background:rgba(236,234,230,0.16)"></div>
+            <div style="position:absolute;left:0;top:32px;width:13px;height:13px;border-radius:50%;background:#4FB5AC;box-shadow:0 0 14px rgba(79,181,172,0.6)"></div>
+            <div style="position:absolute;left:25%;top:32px;width:13px;height:13px;border-radius:50%;background:#4FB5AC;box-shadow:0 0 14px rgba(79,181,172,0.6)"></div>
+            <div style="position:absolute;right:0;top:32px;width:13px;height:13px;border-radius:50%;background:#4FB5AC;box-shadow:0 0 14px rgba(79,181,172,0.6)"></div>
+            <div style="position:absolute;left:0;top:0;font-family:'JetBrains Mono',monospace;font-size:14px;color:#4FB5AC">0.92</div>
+            <div style="position:absolute;left:25%;top:0;font-family:'JetBrains Mono',monospace;font-size:14px;color:#4FB5AC">0.93 ×2</div>
+            <div style="position:absolute;right:0;top:0;font-family:'JetBrains Mono',monospace;font-size:14px;color:#4FB5AC">0.96</div>
+            <div style="position:absolute;left:0;top:56px;font-family:'JetBrains Mono',monospace;font-size:13px;color:#B4AFBB">0.92</div>
+            <div style="position:absolute;left:50%;transform:translateX(-50%);top:56px;font-family:'JetBrains Mono',monospace;font-size:13px;color:#B4AFBB;white-space:nowrap">mean 0.935 · sd 0.017 · range 0.04</div>
+            <div style="position:absolute;right:0;top:56px;font-family:'JetBrains Mono',monospace;font-size:13px;color:#B4AFBB">0.96</div>
+          </div>
+          <p style="margin:clamp(16px,2.2vw,22px) 0 0;font-size:16px;line-height:1.7;color:#C7C3CD;font-weight:300"><strong style="color:#ECEAE6;font-weight:600">Working rule:</strong> a difference below ~0.035 (2 sd) is not a result.</p>
+        </div>
+        <p style="margin:clamp(20px,2.6vw,28px) 0 clamp(22px,3vw,30px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">This is the cheapest useful number in the whole project - four clicks - and it's the one that prevents weeks spent tuning prompts against movement that was always going to happen anyway. It's also the answer to the first question anyone should ask about an A/B result: <em>how do you know that isn't noise?</em></p>
+        <div style="border:1px solid rgba(236,234,230,0.14);border-radius:6px;overflow:hidden;background:#11141A"><img src="screenshots/03-evaluations-runs.png" alt="n8n Evaluations tab showing coverage tracked across successive runs" style="display:block;width:100%"></div>
+        <p style="margin:12px 0 0;font-size:14.5px;line-height:1.7;color:#B4AFBB;font-style:italic;font-weight:300;max-width:60ch">Runs tracked in n8n's Evaluations tab. Metrics are set by the workflow itself, so score history comes for free - no separate store.</p>
+      </section>
+
+      <section data-reveal="">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">08</div>
+        <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">how it's wired</h2>
+        <p style="margin:0 0 clamp(24px,3.2vw,34px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">The eval is a second workflow, deliberately separate from production. It reads the golden set row by row, so every run scores the same frozen sample - otherwise a prompt change and a news cycle would move at the same time and neither could be blamed.</p>
+
+        <div style="border:1px solid rgba(236,234,230,0.14);border-radius:4px;background:rgba(17,20,26,0.5);backdrop-filter:blur(22px) saturate(1.15);-webkit-backdrop-filter:blur(22px) saturate(1.15);padding:clamp(22px,3vw,34px)">
+          <div style="display:flex;flex-direction:column">
+
+            <div style="display:flex;gap:clamp(14px,2vw,20px);align-items:stretch">
+              <div style="flex:0 0 auto;display:flex;flex-direction:column;align-items:center;width:34px">
+                <div style="width:12px;height:12px;border-radius:50%;background:#4FB5AC;box-shadow:0 0 16px rgba(79,181,172,0.75);margin-top:7px"></div>
+                <div style="flex:1;width:1px;background:linear-gradient(to bottom, rgba(79,181,172,0.7), rgba(79,181,172,0.28))"></div>
+              </div>
+              <div style="flex:1 1 auto;min-width:0;padding-bottom:clamp(18px,2.4vw,26px)">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:15px;color:#ECEAE6;letter-spacing:0.01em">When fetching a dataset row</div>
+                <div style="font-size:15.5px;line-height:1.6;color:#B4AFBB;font-weight:300;margin-top:6px">Google Sheets, one row per run</div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:clamp(14px,2vw,20px);align-items:stretch">
+              <div style="flex:0 0 auto;display:flex;flex-direction:column;align-items:center;width:34px">
+                <div style="width:9px;height:9px;border-radius:50%;border:1px solid rgba(79,181,172,0.8);background:rgba(79,181,172,0.22);margin-top:8px"></div>
+                <div style="flex:1;width:1px;background:rgba(79,181,172,0.28)"></div>
+              </div>
+              <div style="flex:1 1 auto;min-width:0;padding-bottom:clamp(18px,2.4vw,26px)">
+                <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:10px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:15px;color:#ECEAE6">HTTP Request</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#7FD8CF;border:1px solid rgba(79,181,172,0.28);border-radius:2px;padding:2px 8px">prompt under test</span>
+                </div>
+                <div style="font-size:15.5px;line-height:1.6;color:#B4AFBB;font-weight:300;margin-top:6px">write the digest</div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:clamp(14px,2vw,20px);align-items:stretch">
+              <div style="flex:0 0 auto;display:flex;flex-direction:column;align-items:center;width:34px">
+                <div style="width:9px;height:9px;border-radius:50%;border:1px solid rgba(79,181,172,0.8);background:rgba(79,181,172,0.22);margin-top:8px"></div>
+                <div style="flex:1;width:1px;background:rgba(79,181,172,0.28)"></div>
+              </div>
+              <div style="flex:1 1 auto;min-width:0;padding-bottom:clamp(18px,2.4vw,26px)">
+                <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:10px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:15px;color:#ECEAE6">HTTP Request</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#7FD8CF;border:1px solid rgba(79,181,172,0.28);border-radius:2px;padding:2px 8px">temp 0, JSON out</span>
+                </div>
+                <div style="font-size:15.5px;line-height:1.6;color:#B4AFBB;font-weight:300;margin-top:6px">judge the digest</div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:clamp(14px,2vw,20px);align-items:stretch">
+              <div style="flex:0 0 auto;display:flex;flex-direction:column;align-items:center;width:34px">
+                <div style="width:9px;height:9px;border-radius:50%;border:1px solid rgba(255,158,66,0.85);background:rgba(255,158,66,0.22);margin-top:8px"></div>
+                <div style="flex:1;width:1px;background:rgba(79,181,172,0.28)"></div>
+              </div>
+              <div style="flex:1 1 auto;min-width:0;padding-bottom:clamp(18px,2.4vw,26px)">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:15px;color:#ECEAE6">Code</div>
+                <div style="font-size:15.5px;line-height:1.6;color:#B4AFBB;font-weight:300;margin-top:6px">parse, score, fail loud on bad JSON</div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:clamp(14px,2vw,20px);align-items:stretch">
+              <div style="flex:0 0 auto;display:flex;flex-direction:column;align-items:center;width:34px">
+                <div style="width:9px;height:9px;border-radius:50%;border:1px solid rgba(79,181,172,0.8);background:rgba(79,181,172,0.22);margin-top:8px"></div>
+                <div style="flex:1;width:1px;background:rgba(79,181,172,0.28)"></div>
+              </div>
+              <div style="flex:1 1 auto;min-width:0;padding-bottom:clamp(18px,2.4vw,26px)">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:15px;color:#ECEAE6">Set Outputs</div>
+                <div style="font-size:15.5px;line-height:1.6;color:#B4AFBB;font-weight:300;margin-top:6px">write results back to the sheet</div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:clamp(14px,2vw,20px);align-items:stretch">
+              <div style="flex:0 0 auto;display:flex;flex-direction:column;align-items:center;width:34px">
+                <div style="width:12px;height:12px;border-radius:50%;background:#4FB5AC;box-shadow:0 0 16px rgba(79,181,172,0.75);margin-top:7px"></div>
+              </div>
+              <div style="flex:1 1 auto;min-width:0">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:15px;color:#ECEAE6">Set Metrics</div>
+                <div style="font-size:15.5px;line-height:1.6;color:#B4AFBB;font-weight:300;margin-top:6px">track coverage across runs</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <p style="margin:clamp(20px,2.6vw,28px) 0 clamp(22px,3vw,30px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">One detail worth naming: if the judge returns unparseable JSON, the workflow throws rather than recording a zero. A zero looks like a bad digest; it's actually a broken judge. Silently conflating the two would quietly poison every number downstream.</p>
+        <div style="border:1px solid rgba(236,234,230,0.14);border-radius:6px;overflow:hidden;background:#11141A"><img src="screenshots/02-eval-flow.png" alt="The eval workflow: dataset trigger, generate, judge, score, set outputs, set metrics" style="display:block;width:100%"></div>
+        <p style="margin:12px 0 0;font-size:14.5px;line-height:1.7;color:#B4AFBB;font-style:italic;font-weight:300;max-width:60ch">Built on n8n's native evaluation nodes rather than a bespoke harness.</p>
+      </section>
+
+      <section data-reveal="">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">09</div>
+        <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">limitations</h2>
+        <p style="margin:0 0 18px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch">Stated plainly, because an eval that hides these isn't an eval.</p>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;gap:14px"><span style="color:#4FB5AC;flex:0 0 auto">–</span><p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:68ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">n = 6 articles, 24 items.</strong> Enough to build and validate the mechanism; not enough for confident deltas.</p></div>
+          <div style="display:flex;gap:14px"><span style="color:#4FB5AC;flex:0 0 auto">–</span><p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:68ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">Class imbalance 22:2</strong> makes κ = 1.00 far less impressive than the number suggests.</p></div>
+          <div style="display:flex;gap:14px"><span style="color:#4FB5AC;flex:0 0 auto">–</span><p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:68ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">Single labeller.</strong> No second annotator, so no measure of how much my own labels drift.</p></div>
+          <div style="display:flex;gap:14px"><span style="color:#4FB5AC;flex:0 0 auto">–</span><p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:68ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">Coverage only.</strong> It checks that required facts are present and is structurally blind to invented ones - a digest carrying every labelled fact <em>plus</em> a fabricated sentence would still score 1.00.</p></div>
+          <div style="display:flex;gap:14px"><span style="color:#4FB5AC;flex:0 0 auto">–</span><p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:68ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">Four runs</strong> is a thin basis for a noise estimate. The ±0.04 is indicative, not precise.</p></div>
+          <div style="display:flex;gap:14px"><span style="color:#4FB5AC;flex:0 0 auto">–</span><p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:68ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">No A/B yet</strong> - and at this sample size, against this noise floor, a small prompt delta would be unresolvable anyway.</p></div>
+        </div>
+      </section>
+
+      <section data-reveal="">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">10</div>
+        <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">what six articles bought</h2>
+        <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">The sample is small, and I'd rather be the one to say so. But the three things this surfaced don't depend on sample size, and that's the argument for building the smallest version first.</p>
+        <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">A truncation bug, a non-deterministic model and a noise floor look the same at n=6 as at n=600.</strong> The 600-character cutoff was silently costing the product every verifiable number in a story, and it had been doing that in my inbox every weekday morning without me noticing. Six labelled articles found it in an evening. Six hundred would have found the same thing, later and at more cost.</p>
+        <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">The mechanism now exists and has been checked.</strong> Dataset, judge, scoring, write-back, tracked metrics - and, importantly, a judge whose verdicts I've compared against my own rather than assumed. Growing this is labelling work now, not engineering work.</p>
+        <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">The useful output was never 0.935.</strong> It was finding out that my first number described a system that doesn't exist, and that my second one moves by ±0.04 on its own. At this stage an eval's job isn't to certify that the product is good - it's to tell you whether you can trust your own numbers yet. Mine couldn't, twice. Now it can, within a range I can state.</p>
+        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch">The alternative was continuing to ship something that looked fine.</p>
+      </section>
+
+      <section data-reveal="">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">11</div>
+        <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 20px;text-wrap:pretty">what I'd do next</h2>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;gap:14px"><span style="color:#4FB5AC;flex:0 0 auto">–</span><p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:68ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">Faithfulness</strong> - check each claim in the digest against its source. It needs no golden labels, because the source article <em>is</em> the reference, which means unlike coverage it can run on live production traffic.</p></div>
+          <div style="display:flex;gap:14px"><span style="color:#4FB5AC;flex:0 0 auto">–</span><p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:68ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">A guardrail on faithfulness</strong>, thresholded off the observed baseline distribution rather than a hand-picked number: block the digest and alert instead of shipping a fabricated claim.</p></div>
+          <div style="display:flex;gap:14px"><span style="color:#4FB5AC;flex:0 0 auto">–</span><p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:68ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">Grow the golden set toward failure cases</strong> - paywalled sources, multi-story roundups, corrections, opinion pieces with no hard facts.</p></div>
+          <div style="display:flex;gap:14px"><span style="color:#4FB5AC;flex:0 0 auto">–</span><p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:68ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">Cost and latency as first-class metrics.</strong> An eval that ignores them will happily recommend a prompt that triples the bill.</p></div>
+        </div>
+      </section>
+    </main>
   </div>
-</footer>
 
+  <footer style="position:relative;z-index:1;background:rgba(7,8,11,0.42)">
+    <div style="max-width:1160px;margin:0 auto;padding:clamp(48px,6vw,88px) clamp(20px,5vw,56px)">
+      <div style="display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;border-top:1px solid rgba(236,234,230,0.12);padding-top:20px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#B4AFBB">
+        <div style="display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center">
+          <span style="color:#ECEAE6">Kristína Magyarová</span>
+          <span style="opacity:0.5">·</span>
+          <span>Senior Product Manager</span>
+          <span style="opacity:0.5">·</span>
+          <a href="https://linkedin.com/in/kristymagyarova" style="color:#4FB5AC">linkedin.com/in/kristymagyarova</a>
+        </div>
+        <a href="../index.html">← back to overview</a>
+      </div>
+    </div>
+  </footer>
+</div>
 <script>
-  document.querySelectorAll('figure img').forEach(function (img) {
-    img.addEventListener('error', function () {
-      var slot = document.createElement('div');
-      slot.className = 'shot-missing';
-      slot.innerHTML = 'Screenshot slot - save as <code>' + img.getAttribute('src') + '</code>';
-      img.replaceWith(slot);
+document.addEventListener("DOMContentLoaded", function () {
+    const root = document.body;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const items = Array.from(root.querySelectorAll('[data-reveal]'));
+    items.forEach((el) => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(16px)';
+      el.style.transition = 'opacity .7s cubic-bezier(.2,.6,.2,1), transform .7s cubic-bezier(.2,.6,.2,1)';
     });
-  });
-</script>
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (!e.isIntersecting) return;
+        const el = e.target;
+        setTimeout(() => { el.style.opacity = '1'; el.style.transform = 'none'; }, i * 60);
+        io.unobserve(el);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    items.forEach((el) => io.observe(el));
 
+    const numIo = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const el = e.target;
+        numIo.unobserve(el);
+        const raw = String(el.getAttribute('data-count'));
+        const target = parseFloat(raw);
+        const suffix = raw.replace(/[0-9.]/g, '');
+        if (isNaN(target)) return;
+        const dur = 900, t0 = performance.now();
+        const tick = (t) => {
+          const p = Math.min(1, (t - t0) / dur);
+          const eased = 1 - Math.pow(1 - p, 3);
+          el.textContent = Math.round(target * eased) + (p === 1 ? suffix : '');
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      });
+    }, { threshold: 0.4 });
+    Array.from(root.querySelectorAll('[data-count]')).forEach((el) => numIo.observe(el));
+    this._observers = [io, numIo];
+});
+</script>
 </body>
 </html>
