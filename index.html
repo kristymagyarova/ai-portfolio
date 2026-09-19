@@ -673,4 +673,25 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 
 
+<script>
+(function(){
+  var URL_ = "https://script.google.com/macros/s/AKfycbzxCKbFmFqL8V0i7jT2_Wt5I46q6f7kjw3l1uvvg51PM6Ef2FGY-81VwdmP9lSM28LX/exec";
+  try {
+    if (new URLSearchParams(location.search).get("noanalytics") === "1") {
+      localStorage.setItem("km_no_track", "1");
+    }
+    if (localStorage.getItem("km_no_track") === "1") return;
+  } catch (e) {}
+  try {
+    var params = new URLSearchParams({
+      page: location.pathname,
+      ref: document.referrer || "",
+      lang: navigator.language || "",
+      screen: screen.width + "x" + screen.height,
+      ua: navigator.userAgent
+    });
+    new Image().src = URL_ + "?" + params.toString();
+  } catch (e) {}
+})();
+</script>
 </body></html>
