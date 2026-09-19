@@ -354,6 +354,9 @@
     section#top > div:last-child > div:first-child { flex-basis: 100% !important; }
     section#top > div:last-child > div:last-child { flex-basis: 62% !important; margin: 0 auto !important; }
     #about > div { grid-template-columns: 1fr !important; }
+    .stat-row { grid-template-columns: 1fr !important; }
+    .stat-cell { border-right: 0 !important; border-top: 1px solid rgba(236,234,230,0.09); padding-left: 0 !important; }
+    .stat-cell:first-child { border-top: 0; }
   }
 </style>
 
@@ -495,20 +498,20 @@
   <section style="position:relative;z-index:1;isolation:isolate">
     <div style="position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);width:min(calc(100% - 2*clamp(20px,5vw,56px)),1160px);pointer-events:none;border:1px solid rgba(236,234,230,0.16);border-radius:3px;backdrop-filter:blur(34px) saturate(1.25) brightness(0.52);-webkit-backdrop-filter:blur(34px) saturate(1.25) brightness(0.52);background:linear-gradient(to bottom, rgba(236,234,230,0.05), rgba(236,234,230,0.02))"></div>
     <div style="position:relative;max-width:1160px;margin:0 auto;padding:0 calc(clamp(20px,5vw,56px) + 28px)">
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
-        <div data-reveal="" style="padding:clamp(26px,3.4vw,40px) 24px clamp(26px,3.4vw,40px) 0;border-right:1px solid rgba(236,234,230,0.09)">
+      <div class="stat-row" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+        <div data-reveal="" style="padding:clamp(26px,3.4vw,40px) 24px clamp(26px,3.4vw,40px) 0;border-right:1px solid rgba(236,234,230,0.09)" class="stat-cell">
           <div data-count="6" style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(36px,4.4vw,54px);line-height:1;color:#4FB5AC">6</div>
           <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#B4AFBB;margin-top:10px">AI initiatives led or shaped</div>
         </div>
-        <div data-reveal="" style="padding:clamp(26px,3.4vw,40px) 24px clamp(26px,3.4vw,40px) clamp(16px,2vw,28px);border-right:1px solid rgba(236,234,230,0.09)">
+        <div data-reveal="" style="padding:clamp(26px,3.4vw,40px) 24px clamp(26px,3.4vw,40px) clamp(16px,2vw,28px);border-right:1px solid rgba(236,234,230,0.09)" class="stat-cell">
           <div data-count="4+" style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(36px,4.4vw,54px);line-height:1;color:#4FB5AC">4+</div>
           <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#B4AFBB;margin-top:10px">Years in product</div>
         </div>
-        <div data-reveal="" style="padding:clamp(26px,3.4vw,40px) 24px clamp(26px,3.4vw,40px) clamp(16px,2vw,28px);border-right:1px solid rgba(236,234,230,0.09)">
+        <div data-reveal="" style="padding:clamp(26px,3.4vw,40px) 24px clamp(26px,3.4vw,40px) clamp(16px,2vw,28px);border-right:1px solid rgba(236,234,230,0.09)" class="stat-cell">
           <div data-count="10+" style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(36px,4.4vw,54px);line-height:1;color:#4FB5AC">10+</div>
           <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#B4AFBB;margin-top:10px">Products &amp; platforms shipped</div>
         </div>
-        <div data-reveal="" style="padding:clamp(26px,3.4vw,40px) 0 clamp(26px,3.4vw,40px) clamp(16px,2vw,28px)">
+        <div data-reveal="" style="padding:clamp(26px,3.4vw,40px) 0 clamp(26px,3.4vw,40px) clamp(16px,2vw,28px)" class="stat-cell">
           <div data-count="6" style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(36px,4.4vw,54px);line-height:1;color:#4FB5AC">6</div>
           <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#B4AFBB;margin-top:10px">Industries</div>
         </div>
