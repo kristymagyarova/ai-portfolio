@@ -502,13 +502,20 @@ a:hover { color: #4FB5AC; }
       <section data-reveal="">
         <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">03</div>
         <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">designed for the gym floor</h2>
-        <div style="display:flex;flex-wrap:wrap;gap:clamp(20px,3vw,36px);align-items:flex-start">
-          <p style="flex:1 1 320px;margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;text-wrap:pretty">The interface rules came from actually using it mid-set, not from a design system: large touch targets, one-handed operation, minimum taps to log a set, readable at a glance on a screen I'm not looking at closely. Every set is pre-filled from the last time I did that exercise, so logging a normal set is a single tap, not data entry. Ending a workout requires a confirmation. A stray tap mid-set shouldn't be able to erase 45 minutes of logged training.</p>
-          <div style="flex:0 1 230px;min-width:180px;display:flex;flex-direction:column;gap:12px">
+        <p style="margin:0 0 clamp(18px,2.4vw,24px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">The interface rules came from actually using it mid-set, not from a design system: large touch targets, one-handed operation, minimum taps to log a set, readable at a glance on a screen I'm not looking at closely. Every set is pre-filled from the last time I did that exercise, so logging a normal set is a single tap, not data entry. Ending a workout requires a confirmation - a stray tap mid-set shouldn't be able to erase 45 minutes of logged training.</p>
+        <p style="margin:0 0 clamp(18px,2.4vw,24px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Those rules got a proper visual pass later, in what I'd call the "liquid glass" redesign: bigger touch targets, softer surfaces, less to parse on a screen I'm glancing at mid-set. One screen was ported pixel-for-pixel from a Claude Design canvas file straight into SwiftUI - the design tool and the coding agent were two steps of one pipeline, not two separate tools I had to bridge myself.</p>
+        <div style="display:grid;gap:clamp(14px,2vw,20px);grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:clamp(22px,3vw,32px)">
+          <div style="display:flex;flex-direction:column;gap:12px">
             <div style="border-radius:clamp(18px,2.6vw,28px);padding:5px;background:linear-gradient(155deg, rgba(236,234,230,0.3), rgba(236,234,230,0.05) 55%, rgba(236,234,230,0.16));box-shadow:0 26px 60px rgba(0,0,0,0.62)">
-              <img src="screenshots/04-live-workout.png" alt="GymTracker live workout screen - set logging with rest timer" style="display:block;width:100%;border-radius:clamp(14px,2.2vw,24px)">
+              <img src="screenshots/10-liquid-glass-before.png" alt="GymTracker live workout screen, before the liquid glass pass" style="display:block;width:100%;border-radius:clamp(14px,2.2vw,24px)">
             </div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.05em;color:#B4AFBB;line-height:1.6">large targets, one-handed reach</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.05em;color:#B4AFBB;line-height:1.6">before - boxed cards, hard edges</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="border-radius:clamp(18px,2.6vw,28px);padding:5px;background:linear-gradient(155deg, rgba(236,234,230,0.3), rgba(236,234,230,0.05) 55%, rgba(236,234,230,0.16));box-shadow:0 26px 60px rgba(0,0,0,0.62)">
+              <img src="screenshots/04-live-workout.png" alt="GymTracker live workout screen, after the liquid glass pass" style="display:block;width:100%;border-radius:clamp(14px,2.2vw,24px)">
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.05em;color:#B4AFBB;line-height:1.6">after - liquid glass, bigger targets, softer surfaces</div>
           </div>
         </div>
       </section>
@@ -516,22 +523,34 @@ a:hover { color: #4FB5AC; }
       <section data-reveal="">
         <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">04</div>
         <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">the design pass that got redone three times</h2>
-        <p style="margin:0 0 clamp(22px,3vw,32px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">The home screen's progress view is a panoramic "path to the summit" - a hike up a mountain range that fills in as the training block progresses. It went through visible iteration, commit by commit: three mountain layers aligned on the same curve, a lighter, more distant peak repositioned onto the same ridge as the main summit, then darker, less saturated mountain colors matched against a Claude Design reference image. None of that was code review - it was closer to art direction, done in plain language, one visual adjustment per commit.</p>
-        <div style="display:grid;gap:clamp(14px,2vw,20px);grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:clamp(22px,3vw,32px)">
+        <p style="margin:0 0 clamp(18px,2.4vw,24px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">The home screen went through more visual experimentation than anything else in the app - not a straight line of shipped iterations, more like trying out different directions to see what would actually hold up: a bordered card highlighting today's workout, inline stats with a day badge, a flatter layout with bigger type and no border at all. None of that was code review - it was closer to art direction, done in plain language, picking whichever direction actually looked and felt right before it went anywhere near main.</p>
+        <div style="display:grid;gap:clamp(14px,2vw,20px);grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:clamp(22px,3vw,32px)">
           <div style="display:flex;flex-direction:column;gap:12px">
             <div style="border-radius:clamp(18px,2.6vw,28px);padding:5px;background:linear-gradient(155deg, rgba(236,234,230,0.3), rgba(236,234,230,0.05) 55%, rgba(236,234,230,0.16));box-shadow:0 26px 60px rgba(0,0,0,0.62)">
-              <img src="screenshots/05-new-activity.png" alt="GymTracker new activity screen - liquid glass pass" style="display:block;width:100%;border-radius:clamp(14px,2.2vw,24px)">
+              <img src="screenshots/07-home-pass1.png" alt="GymTracker home screen, first visual direction" style="display:block;width:100%;border-radius:clamp(14px,2.2vw,24px)">
             </div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.05em;color:#B4AFBB;line-height:1.6">liquid glass pass, every screen</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.05em;color:#B4AFBB;line-height:1.6">direction 1 - bordered card, one workout highlighted</div>
           </div>
           <div style="display:flex;flex-direction:column;gap:12px">
-            <div style="border:1px solid rgba(236,234,230,0.14);border-radius:clamp(12px,1.8vw,18px);overflow:hidden;box-shadow:0 26px 60px rgba(0,0,0,0.55)">
-              <img src="screenshots/06-mountain-graphic.png" alt="Path-to-the-summit progress view, three mountain layers on one ridge" style="display:block;width:100%">
+            <div style="border-radius:clamp(18px,2.6vw,28px);padding:5px;background:linear-gradient(155deg, rgba(236,234,230,0.3), rgba(236,234,230,0.05) 55%, rgba(236,234,230,0.16));box-shadow:0 26px 60px rgba(0,0,0,0.62)">
+              <img src="screenshots/08-home-pass2.png" alt="GymTracker home screen, second visual direction" style="display:block;width:100%;border-radius:clamp(14px,2.2vw,24px)">
             </div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.05em;color:#B4AFBB;line-height:1.6">three mountain layers, one shared ridge</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.05em;color:#B4AFBB;line-height:1.6">direction 2 - inline stats, day badge</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="border-radius:clamp(18px,2.6vw,28px);padding:5px;background:linear-gradient(155deg, rgba(236,234,230,0.3), rgba(236,234,230,0.05) 55%, rgba(236,234,230,0.16));box-shadow:0 26px 60px rgba(0,0,0,0.62)">
+              <img src="screenshots/09-home-pass3.png" alt="GymTracker home screen, third visual direction" style="display:block;width:100%;border-radius:clamp(14px,2.2vw,24px)">
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.05em;color:#B4AFBB;line-height:1.6">direction 3 - flatter, bigger type, no border</div>
           </div>
         </div>
-        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Later, the whole app went through a second, larger pass: a "liquid glass" visual refresh across every screen, including one screen ported pixel-for-pixel from a Claude Design canvas file straight into SwiftUI. The design tool and the coding agent were two steps of one pipeline, not two separate tools I had to bridge myself.</p>
+        <p style="margin:0 0 clamp(18px,2.4vw,24px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">The home screen's progress view got its own pass too: a small gamification touch, a panoramic hike that fills in as the training block progresses, so I can see at a glance which week I'm in and how many sessions I've already banked.</p>
+        <div style="display:flex;flex-direction:column;gap:12px;max-width:520px">
+          <div style="border:1px solid rgba(236,234,230,0.14);border-radius:clamp(12px,1.8vw,18px);overflow:hidden;box-shadow:0 26px 60px rgba(0,0,0,0.55)">
+            <img src="screenshots/06-mountain-graphic.png" alt="Path-to-the-summit progress view, three mountain layers on one ridge" style="display:block;width:100%">
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.05em;color:#B4AFBB;line-height:1.6">three mountain layers, one shared ridge</div>
+        </div>
       </section>
 
       <section data-reveal="">
