@@ -355,12 +355,23 @@ a:hover { color: #4FB5AC; }
   .stat-cell { border-right: 0 !important; border-top: 1px solid rgba(236,234,230,0.09); padding-left: 0 !important; }
   .stat-cell:first-child { border-top: 0; }
 }
+
+.more > summary { list-style:none; cursor:pointer; display:inline-flex; align-items:center; gap:14px; padding:13px 20px; border:1px solid rgba(79,181,172,0.5); border-radius:3px; background:#11141A; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.09em; text-transform:uppercase; color:#4FB5AC; transition:border-color .25s ease, background .25s ease, color .25s ease; }
+.more > summary::-webkit-details-marker { display:none; }
+.more > summary:hover { border-color:#4FB5AC; background:#141821; color:#ECEAE6; }
+.more > summary:focus-visible { outline:2px solid #4FB5AC; outline-offset:4px; }
+.more .icon { flex:0 0 auto; transition:transform .25s ease; }
+.more[open] .icon { transform:rotate(180deg); }
+.more .when-open { display:none; }
+.more[open] .when-open { display:inline; }
+.more[open] .when-closed { display:none; }
+#aurora { -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 260px),transparent); mask-image:linear-gradient(to bottom,#000 calc(100% - 260px),transparent); }
 </style>
 </head>
 <body>
 <div style="background:transparent;color:#ECEAE6;min-height:100vh;overflow-x:hidden;position:relative">
 
-<div style="position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden">
+<div id="aurora" style="position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden">
     <div style="position:absolute;left:76%;top:6%;width:min(80vw,920px);aspect-ratio:1.25/1;transform:translate(-50%,-38%)">
       <div style="position:absolute;inset:0;border-radius:50%;mix-blend-mode:screen;filter:blur(58px);background:radial-gradient(circle at 50% 50%, rgba(64,236,212,0.95) 0%, rgba(64,236,212,0.95) 30%, rgba(64,236,212,0.47) 54%, rgba(64,236,212,0) 78%);animation:auroraA 30s ease-in-out infinite"></div>
     </div>
@@ -377,7 +388,7 @@ a:hover { color: #4FB5AC; }
     <div style="position:absolute;left:80%;top:23%;width:min(44vw,540px);height:1.5px;--r:5deg;transform:translate(-50%,-50%) rotate(5deg);mix-blend-mode:screen;filter:blur(1.2px);background:linear-gradient(90deg, rgba(64,236,212,0) 0%, rgba(64,236,212,0.38) 38%, rgba(64,236,212,0.38) 62%, rgba(64,236,212,0) 100%);animation:filament 46s ease-in-out infinite;animation-delay:-9s"></div>
 
     <div style="position:absolute;left:40%;top:46%;width:min(74vw,860px);aspect-ratio:1.4/1;transform:translate(-50%,-50%)">
-      <div style="position:absolute;inset:0;border-radius:50%;mix-blend-mode:screen;filter:blur(62px);background:radial-gradient(circle at 50% 50%, rgba(64,236,212,0.88) 0%, rgba(64,236,212,0.88) 30%, rgba(64,236,212,0.44) 54%, rgba(64,236,212,0) 78%);animation:auroraB 52s ease-in-out infinite"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;mix-blend-mode:screen;filter:blur(62px);background:radial-gradient(circle at 50% 50%, rgba(255,86,178,0.5) 0%, rgba(255,86,178,0.5) 30%, rgba(255,86,178,0.25) 54%, rgba(255,86,178,0) 78%);animation:auroraB 52s ease-in-out infinite"></div>
     </div>
     <div style="position:absolute;left:66%;top:53%;width:min(54vw,640px);aspect-ratio:1.3/1;transform:translate(-50%,-50%)">
       <div style="position:absolute;inset:0;border-radius:50%;mix-blend-mode:screen;filter:blur(56px);background:radial-gradient(circle at 50% 50%, rgba(255,158,66,0.72) 0%, rgba(255,158,66,0.72) 30%, rgba(255,158,66,0.36) 54%, rgba(255,158,66,0) 78%);animation:auroraA 58s ease-in-out infinite"></div>
@@ -421,7 +432,7 @@ a:hover { color: #4FB5AC; }
         iOS app · built with Claude Code · Aug–Sep 2026
       </div>
       <h1 data-reveal="" style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(31px,4.8vw,58px);line-height:1.08;letter-spacing:-0.018em;margin:0 0 clamp(18px,2.6vw,28px);max-width:17em;text-wrap:pretty">I built my own iPhone app. It runs on my phone, I use it every week, <span style="color:#4FB5AC">and Claude Code wrote the code.</span></h1>
-      <p data-reveal="" style="font-size:clamp(16.5px,1.35vw,19px);line-height:1.75;color:#C7C3CD;max-width:64ch;margin:0;font-weight:300;text-wrap:pretty">GymTracker is a SwiftUI + SwiftData iOS app I use for every workout. I wrote the spec, made the product and data-model decisions, and reviewed every change - Claude Code wrote and committed the Swift. This is what that process actually looked like.</p>
+      <p data-reveal="" style="font-size:clamp(16.5px,1.35vw,19px);line-height:1.75;color:#C7C3CD;max-width:64ch;margin:0;font-weight:300;text-wrap:pretty">I designed and built my own iPhone workout app, and I use it for every workout. I wrote the spec and made the product decisions, Claude Code wrote the code. It runs fully offline: no account, no server.</p>
       </div>
       <div data-reveal="" style="flex:1 1 400px;min-width:0;position:relative;display:flex;align-items:flex-end;justify-content:center">
         <div style="position:absolute;left:50%;top:50%;width:118%;aspect-ratio:1/1;transform:translate(-50%,-50%);pointer-events:none;mix-blend-mode:screen;filter:blur(46px);border-radius:50%;background:radial-gradient(circle at 46% 48%, rgba(255,86,178,0.42) 0%, rgba(255,86,178,0.2) 38%, rgba(64,236,212,0.14) 62%, rgba(64,236,212,0) 80%)"></div>
@@ -447,8 +458,8 @@ a:hover { color: #4FB5AC; }
           <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#B4AFBB;margin-top:10px">Commits (Aug–Sep 2026)</div>
         </div>
         <div data-reveal="" style="padding:clamp(26px,3.4vw,40px) 24px clamp(26px,3.4vw,40px) clamp(16px,2vw,28px);border-right:1px solid rgba(236,234,230,0.09)" class="stat-cell">
-          <div data-count="6" style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(36px,4.4vw,54px);line-height:1;color:#4FB5AC">6</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#B4AFBB;margin-top:10px">Weeks (spec to daily use)</div>
+          <div data-count="2" style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(36px,4.4vw,54px);line-height:1;color:#4FB5AC">2</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#B4AFBB;margin-top:10px">Days to a usable first version (~10 h of work)</div>
         </div>
         <div data-reveal="" style="padding:clamp(26px,3.4vw,40px) 24px clamp(26px,3.4vw,40px) clamp(16px,2vw,28px);border-right:1px solid rgba(236,234,230,0.09)" class="stat-cell">
           <div data-count="0" style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(36px,4.4vw,54px);line-height:1;color:#4FB5AC">0</div>
@@ -466,28 +477,16 @@ a:hover { color: #4FB5AC; }
 
     <aside style="flex:1 1 250px;min-width:0;max-width:320px;display:flex;flex-direction:column;gap:clamp(20px,2.4vw,26px)">
       <div data-reveal="">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;margin-bottom:9px">my role</div>
-        <p style="margin:0;font-size:15.5px;line-height:1.78;color:#C7C3CD;font-weight:300;text-wrap:pretty">I wrote the spec, made the product and data-model decisions, and reviewed every change. Claude Code wrote and committed the Swift, one small change at a time.</p>
-      </div>
-      <div data-reveal="" style="border-top:1px solid rgba(236,234,230,0.11);padding-top:clamp(18px,2.2vw,24px)">
         <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;margin-bottom:9px">stack</div>
-        <p style="margin:0;font-size:15.5px;line-height:1.78;color:#C7C3CD;font-weight:300;text-wrap:pretty">Swift + SwiftUI · SwiftData · iOS 17+ · no external dependencies. Planned: CloudKit, ActivityKit.</p>
+        <p style="margin:0;font-size:15.5px;line-height:1.78;color:#C7C3CD;font-weight:300;text-wrap:pretty">Swift + SwiftUI · SwiftData · iOS 17+ · no external dependencies. Built with Xcode, Claude Code and GitHub, designed with Claude Design.</p>
       </div>
       <div data-reveal="" style="border-top:1px solid rgba(236,234,230,0.11);padding-top:clamp(18px,2.2vw,24px)">
         <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;margin-bottom:9px">status</div>
         <p style="margin:0;font-size:15.5px;line-height:1.78;color:#C7C3CD;font-weight:300;text-wrap:pretty">A personal app, installed on my own iPhone via Xcode. Not on the App Store, and not meant to be. Yet...</p>
       </div>
       <div data-reveal="" style="border-top:1px solid rgba(236,234,230,0.11);padding-top:clamp(18px,2.2vw,24px)">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;margin-bottom:9px">how I worked</div>
-        <p style="margin:0;font-size:15.5px;line-height:1.78;color:#C7C3CD;font-weight:300;text-wrap:pretty">Plan before code, always. One feature = one change = one commit, with a plain-language summary of what changed and why. I pasted raw Xcode errors, unedited, whenever something broke.</p>
-      </div>
-      <div data-reveal="" style="border-top:1px solid rgba(236,234,230,0.11);padding-top:clamp(18px,2.2vw,24px)">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;margin-bottom:9px">design pipeline</div>
-        <p style="margin:0;font-size:15.5px;line-height:1.78;color:#C7C3CD;font-weight:300;text-wrap:pretty">Prototyped visual passes in Claude Design, then ported pixel-for-pixel into SwiftUI.</p>
-      </div>
-      <div data-reveal="" style="border-top:1px solid rgba(236,234,230,0.11);padding-top:clamp(18px,2.2vw,24px)">
         <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;margin-bottom:9px">effort</div>
-        <p style="margin:0;font-size:15.5px;line-height:1.78;color:#C7C3CD;font-weight:300;text-wrap:pretty">56 commits across 6 weeks of evenings, alongside a full-time job - the first app I've shipped without writing a line of the code myself, spec'd, reviewed, and used every week since.</p>
+        <p style="margin:0;font-size:15.5px;line-height:1.78;color:#C7C3CD;font-weight:300;text-wrap:pretty">First usable version in about 2 days (roughly 10 hours of active work), on my phone three days later. Then 56 commits across 6 weeks of evenings, alongside a full-time job - the first app I've shipped without writing a line of the code myself, spec'd, reviewed, and used every week since.</p>
       </div>
     </aside>
 
@@ -496,14 +495,14 @@ a:hover { color: #4FB5AC; }
       <section data-reveal="">
         <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">01</div>
         <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">the product plan</h2>
-        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Before any code, I defined the actual goal: log every set of every workout, with minimum friction mid-set, fully offline. From there I scoped an MVP - program setup, an exercise library, and the live workout flow - and pushed everything else into later waves: a rest timer, workout history, body-weight tracking, data export, and eventually a retrospective view of progress against each program's goal. Only once that scope and sequencing were settled did work move to the data structure, and only after that to the screens themselves.</p>
+        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Before any code, I defined the actual goal: log every set of every workout, with minimum friction mid-set, fully offline. From there I scoped an MVP - program setup, an exercise library, and the live workout flow - and pushed everything else into later waves: a rest timer, workout history, body-weight tracking, data export, and eventually a retrospective view of progress against each program's goal. It also logs non-lifting activity - a run, a hike, a round of golf - without forcing it through the strength-training shape. Only once that scope and sequencing were settled did work move to the data structure, and only after that to the screens themselves.</p>
       </section>
 
       <section data-reveal="">
         <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">02</div>
         <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">the product decision</h2>
-        <p style="margin:0 0 20px;font-family:Newsreader,Georgia,serif;font-size:clamp(18px,1.9vw,23px);line-height:1.45;color:#4FB5AC;font-weight:300;border-left:1px solid rgba(79,181,172,0.5);padding-left:18px;max-width:34ch">Prescribed is not the same as trained.</p>
-        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">That's the one sentence the whole app is built to protect, and it's a product decision before it's a technical one. A program defines what should happen: an ordered day, with prescribed sets, reps and starting weight. A session records what actually happened, logged directly against the exercise itself - not against the plan. That separation is deliberate. If I swap an exercise mid-workout (the gym's cable machine is taken, so I do rows instead), the session should still record exactly what I did, without silently rewriting what was planned or losing the substitution. Plan and reality stay two different things, on purpose.</p>
+        <p style="margin:0 0 20px;font-family:Newsreader,Georgia,serif;font-size:clamp(18px,1.9vw,23px);line-height:1.45;color:#4FB5AC;font-weight:300;border-left:1px solid rgba(79,181,172,0.5);padding-left:18px;max-width:34ch">If the leg press machine is taken and I do hack squats instead, the app logs the hack squats and leaves my plan alone.</p>
+        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">My program says what I should do that day: which exercises, how many sets and reps, which starting weights. A workout records what I actually did. The app keeps those two apart on purpose, so swapping an exercise mid-workout neither rewrites my plan nor gets lost. It sounds like a small detail, but the whole data model is built on it.</p>
       </section>
 
       <section data-reveal="">
@@ -527,8 +526,17 @@ a:hover { color: #4FB5AC; }
         </div>
       </section>
 
+      <details class="more">
+        <summary><span class="when-closed">Read the details</span><span class="when-open">Hide the details</span><svg class="icon" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4.5l4 4 4-4"/></svg></summary>
+        <div style="display:flex;flex-direction:column;gap:clamp(36px,4.5vw,64px);padding-top:clamp(32px,4vw,52px)">
       <section data-reveal="">
         <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">04</div>
+        <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">how I worked</h2>
+        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Plan before code, always. One feature was one change and one commit, each with a plain-language summary of what changed and why. Whenever something broke, I pasted the raw Xcode error, unedited.</p>
+      </section>
+
+      <section data-reveal="">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">05</div>
         <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">the design pass that got redone three times</h2>
         <p style="margin:0 0 clamp(18px,2.4vw,24px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">The home screen went through more visual experimentation than anything else in the app - not a straight line of shipped iterations, more like trying out different directions to see what would actually hold up: a bordered card highlighting today's workout, inline stats with a day badge, a flatter layout with bigger type and no border at all. None of that was code review - it was closer to art direction, done in plain language, picking whichever direction actually looked and felt right before it went anywhere near main.</p>
         <div style="display:grid;gap:clamp(14px,2vw,20px);grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:clamp(22px,3vw,32px)">
@@ -561,16 +569,12 @@ a:hover { color: #4FB5AC; }
       </section>
 
       <section data-reveal="">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">05</div>
-        <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">how it's built</h2>
-        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Everything lives in SwiftData, fully offline - there's no reason a set-logging app needs an account or a server. The schema is deliberately built around the plan/reality separation above, plus room for non-lifting activity (a run, a hike, a round of golf) without forcing it through the strength-training shape. I'm keeping the exact model to myself - it's a small app, but it's mine.</p>
-      </section>
-
-      <section data-reveal="">
         <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">06</div>
         <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">what's next</h2>
-        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Still in daily use, still being tuned - small fixes and refinements as real workouts keep surfacing edge cases the spec didn't anticipate.</p>
+        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">The core is in daily use and still being tuned as real workouts surface edge cases the spec didn't anticipate. Still ahead are the later waves: body-weight tracking, data export, a review of progress against each program's goal, iCloud backup and a rest timer on the lock screen.</p>
       </section>
+        </div>
+      </details>
 
     </main>
   </div>
@@ -634,6 +638,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     this._observers = [io, numIo];
 });
+</script>
+<script>
+(function(){
+  var aurora=document.getElementById("aurora"), d=document.querySelector("details.more");
+  if(!aurora||!d) return;
+  var wrap=aurora.parentElement;
+  function lock(){ if(d.open) return; aurora.style.bottom="auto"; aurora.style.height=wrap.offsetHeight+"px"; }
+  window.addEventListener("load",lock);
+  window.addEventListener("resize",lock);
+  d.addEventListener("toggle",function(){ if(!d.open){ aurora.style.height=""; aurora.style.bottom=""; requestAnimationFrame(lock); } });
+  lock();
+})();
 </script>
 <script>
 (function(){
