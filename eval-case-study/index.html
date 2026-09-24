@@ -2,9 +2,18 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Measuring an LLM digest - eval case study - Kristína Magyarová</title>
+<title>A quality check for my AI news digest - Kristína Magyarová</title>
 <link rel="icon" type="image/png" href="../assets/favicon.png">
-<meta name="description" content="Building an evaluation layer for an LLM newsletter digest with n8n's native evaluation nodes: golden set, validated judge, measured noise floor.">
+<meta name="description" content="How I built a quality check for the AI-written news digest I get every morning, and how it found a bug that was cutting key facts out of the summaries.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.kristymagyarova.com/eval-case-study/">
+<meta property="og:title" content="I built a test to check my daily AI news summaries, and it found a bug">
+<meta property="og:description" content="How I built a quality check for the AI-written news digest I get every morning, and how it found a bug that was cutting key facts out of the summaries.">
+<meta property="og:image" content="https://www.kristymagyarova.com/eval-case-study/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Eval case study: the test scored 1.00, the email that shipped about 0.17, caused by a 600-character cut">
+<meta name="twitter:card" content="summary_large_image">
 <style>/* cyrillic-ext */
 @font-face {
   font-family: 'JetBrains Mono';
