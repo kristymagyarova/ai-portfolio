@@ -431,10 +431,10 @@ a:hover { color: #4FB5AC; }
           eval case study · built with n8n · July 2026
         </div>
         <h1 data-reveal="" style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(31px,4.8vw,58px);line-height:1.08;letter-spacing:-0.018em;margin:0 0 clamp(18px,2.6vw,28px);max-width:17em;text-wrap:pretty">I built a quality check for my AI news digest. <span style="color:#4FB5AC">It caught a hidden bug that was silently dropping the key facts.</span></h1>
-        <p data-reveal="" style="font-size:clamp(16.5px,1.35vw,19px);line-height:1.75;color:#C7C3CD;max-width:64ch;margin:0;font-weight:300;text-wrap:pretty">Every weekday morning, a workflow I built emails me an AI-written digest of the day's tech news. To check whether those summaries keep the facts that matter, I built an eval: a repeatable test for AI output. It scored the digest 96%. Then I compared one article with the email I actually got, and the real score was about 17%. My test had been checking an easier version of the product than the one that runs.</p>
+        <p data-reveal="" style="font-size:clamp(16.5px,1.35vw,19px);line-height:1.75;color:#C7C3CD;max-width:64ch;margin:0;font-weight:300;text-wrap:pretty">Every weekday morning, a workflow I built emails me an AI-written digest of the day's tech news. To check whether the summaries keep the facts that matter, I built an eval, a repeatable test for AI output. When I compared its results with the emails I actually received, I found that the workflow was cutting every article down to its first 600 characters, so the AI never saw most of the numbers it was supposed to report.</p>
         <div data-reveal="" style="margin-top:clamp(24px,3vw,32px);border-left:1px solid rgba(79,181,172,0.5);padding-left:clamp(14px,2vw,20px);max-width:60ch">
           <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;margin-bottom:8px">what's an eval?</div>
-          <p style="margin:0;font-size:15.5px;line-height:1.75;color:#C7C3CD;font-weight:300;text-wrap:pretty">A repeatable test for AI output, like a quality check on a production line. It turns "looks fine" into a number you can track, compare and defend. Anyone can say an AI feature seems to work. Knowing how well it works, and when your own measurement is wrong, is what makes it safe to ship.</p>
+          <p style="margin:0;font-size:15.5px;line-height:1.75;color:#C7C3CD;font-weight:300;text-wrap:pretty">A repeatable test for AI output, similar to a quality check on a production line. It gives you a number you can track over time, so you can see whether a change made the AI better or worse instead of judging by how the output looks.</p>
         </div>
       </div>
 
@@ -500,7 +500,7 @@ a:hover { color: #4FB5AC; }
     <aside style="flex:1 1 250px;min-width:0;max-width:320px;display:flex;flex-direction:column;gap:clamp(20px,2.4vw,26px)">
       <div data-reveal="">
         <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;margin-bottom:9px">the system</div>
-        <p style="margin:0;font-size:15.5px;line-height:1.78;color:#C7C3CD;font-weight:300;text-wrap:pretty">A scheduled n8n workflow reads four AI/tech feeds each weekday morning, Claude writes a short digest of each story, and it lands in my inbox at 08:00.</p>
+        <p style="margin:0;font-size:15.5px;line-height:1.78;color:#C7C3CD;font-weight:300;text-wrap:pretty">I set up an n8n workflow that collects stories from four AI and tech news feeds every weekday morning. It has an AI model summarise each one and emails me the digest at 08:00.</p>
       </div>
       <div data-reveal="" style="border-top:1px solid rgba(236,234,230,0.11);padding-top:clamp(18px,2.2vw,24px)">
         <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;margin-bottom:9px">stack</div>
@@ -513,8 +513,8 @@ a:hover { color: #4FB5AC; }
         </div>
       </div>
       <div data-reveal="" style="border-top:1px solid rgba(236,234,230,0.11);padding-top:clamp(18px,2.2vw,24px)">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;margin-bottom:9px">effort</div>
-        <p style="margin:0;font-size:15.5px;line-height:1.78;color:#C7C3CD;font-weight:300;text-wrap:pretty">Four evenings, start to finish - including learning the tooling. The workflows, the golden set and the judge prompts are the boring part - the useful part was checking whether the number I'd produced meant anything, and finding out twice that it didn't.</p>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;margin-bottom:9px">time spent</div>
+        <p style="margin:0;font-size:15.5px;line-height:1.78;color:#C7C3CD;font-weight:300;text-wrap:pretty">Four evenings, start to finish, including learning the tooling. That covered building the eval workflow, labelling the test articles by hand and checking the AI judge against my own labels.</p>
       </div>
     </aside>
 
@@ -525,16 +525,16 @@ a:hover { color: #4FB5AC; }
         <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 20px;text-wrap:pretty">what I found</h2>
         <div style="display:flex;flex-direction:column;gap:clamp(18px,2.4vw,26px)">
           <div style="border-left:1px solid rgba(79,181,172,0.5);padding-left:18px">
-            <p style="margin:0 0 8px;font-family:Newsreader,Georgia,serif;font-size:clamp(18px,1.9vw,22px);line-height:1.4;color:#ECEAE6;font-weight:400">The eval was scoring an easier task than the one production runs.</p>
-            <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">The golden set fed the model full articles. Production truncated each one to 600 characters of RSS snippet. Same article, same prompt, same model - coverage 1.00 in the eval, roughly 0.17 in the email that actually shipped.</p>
+            <p style="margin:0 0 8px;font-family:Newsreader,Georgia,serif;font-size:clamp(18px,1.9vw,22px);line-height:1.4;color:#ECEAE6;font-weight:400">The workflow was cutting articles short before the AI saw them.</p>
+            <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">The test used full articles, but the live workflow cut each one to its first 600 characters. On the same article, the digest scored 1.00 in the test and about 0.17 in the email I actually received.</p>
           </div>
           <div style="border-left:1px solid rgba(79,181,172,0.5);padding-left:18px">
-            <p style="margin:0 0 8px;font-family:Newsreader,Georgia,serif;font-size:clamp(18px,1.9vw,22px);line-height:1.4;color:#ECEAE6;font-weight:400">Same input, same prompt - different output.</p>
-            <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">One run named five malware-laden games; the next named three. That single item moved coverage 1.00 → 0.83 with nothing changed.</p>
+            <p style="margin:0 0 8px;font-family:Newsreader,Georgia,serif;font-size:clamp(18px,1.9vw,22px);line-height:1.4;color:#ECEAE6;font-weight:400">Running the same test twice gave different results.</p>
+            <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">One run listed five of the games mentioned in an article, the next listed three. That alone moved the score from 1.00 to 0.83 with nothing changed.</p>
           </div>
           <div style="border-left:1px solid rgba(79,181,172,0.5);padding-left:18px">
-            <p style="margin:0 0 8px;font-family:Newsreader,Georgia,serif;font-size:clamp(18px,1.9vw,22px);line-height:1.4;color:#ECEAE6;font-weight:400">The noise floor is ±0.04, so most "improvements" would have been imaginary.</p>
-            <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Four identical runs returned 0.96 / 0.93 / 0.93 / 0.92. Any prompt change smaller than that isn't a result - and it costs four clicks to know that.</p>
+            <p style="margin:0 0 8px;font-family:Newsreader,Georgia,serif;font-size:clamp(18px,1.9vw,22px);line-height:1.4;color:#ECEAE6;font-weight:400">The score moves by about ±0.04 on its own.</p>
+            <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Four identical runs returned 0.96, 0.93, 0.93 and 0.92. A prompt change that moves the score by less than that can't be told apart from chance.</p>
           </div>
         </div>
       </section>
@@ -542,7 +542,7 @@ a:hover { color: #4FB5AC; }
       <section data-reveal="">
         <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">02</div>
         <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">what I took from it</h2>
-        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">The useful output was never 0.935.</strong> It was finding out that my first number described a system that doesn't exist, and that my second one moves by &plusmn;0.04 on its own. At this stage an eval's job isn't to certify that the product is good - it's to tell you whether you can trust your own numbers yet. Mine couldn't, twice. Now it can, within a range I can state.</p>
+        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">An eval is only useful if it tests the same thing that runs in production. Mine didn't at first, and comparing it with the real emails is what showed me the bug. Knowing how much the score moves on its own also tells me which future changes are real improvements and which are just noise.</p>
       </section>
 
       <details class="more">
@@ -582,7 +582,7 @@ a:hover { color: #4FB5AC; }
       <section data-reveal="">
         <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">06</div>
         <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">validating the judge</h2>
-        <p style="margin:0 0 clamp(20px,2.6vw,28px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">An unvalidated judge is a random number generator with good manners. Before trusting a single number it produced, I graded all 24 items myself - <strong style="color:#ECEAE6;font-weight:600">blind</strong>, with the judge's column hidden in the sheet until mine was finished - and compared.</p>
+        <p style="margin:0 0 clamp(20px,2.6vw,28px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Before trusting a single number it produced, I graded all 24 items myself - <strong style="color:#ECEAE6;font-weight:600">blind</strong>, with the judge's column hidden in the sheet until mine was finished - and compared.</p>
         <div style="overflow-x:auto">
           <table style="width:100%;border-collapse:collapse;font-size:15.5px;color:#C7C3CD;font-weight:300;min-width:460px">
             <thead>
@@ -605,12 +605,12 @@ a:hover { color: #4FB5AC; }
           </table>
         </div>
         <p style="margin:14px 0 18px;font-size:15.5px;line-height:1.7;color:#C7C3CD;font-weight:300">Raw agreement 24/24 · Cohen's κ = 1.00</p>
-        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">This is weaker than it looks, and I'd rather say so than oversell it.</strong> 22 of 24 items are "present", so a judge that answered "yes" to everything would still score 91.7% agreement. The test barely pressed on it. What it does establish is that we agree on both <em>negatives</em> - the two real misses - which is the direction that matters. To make this result mean something I need a golden set with more failure cases in it.</p>
+        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">This result is weaker than it looks.</strong> 22 of 24 items are "present", so a judge that answered "yes" to everything would still score 91.7% agreement. The test barely pressed on it. What it does establish is that we agree on both <em>negatives</em> - the two real misses - which is the direction that matters. To make this result mean something I need a golden set with more failure cases in it.</p>
       </section>
 
       <section data-reveal="">
         <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">07</div>
-        <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">finding 1 - measuring a system that doesn't exist</h2>
+        <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">finding 1 - the test and the live workflow saw different text</h2>
         <p style="margin:0 0 clamp(20px,2.6vw,28px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Baseline came back at 0.96. That felt too high, so I checked it against the digest that had actually been emailed that morning, on the same article.</p>
         <div style="overflow-x:auto">
           <table style="width:100%;border-collapse:collapse;font-size:15.5px;color:#C7C3CD;font-weight:300;min-width:440px">
@@ -634,10 +634,10 @@ a:hover { color: #4FB5AC; }
         <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch">The cause was one line of preprocessing in the production workflow:</p>
         <div style="border:1px solid rgba(236,234,230,0.12);border-radius:3px;background:rgba(17,20,26,0.75);padding:clamp(18px,2.4vw,24px) clamp(18px,2.4vw,26px);margin-bottom:18px;font-family:'JetBrains Mono',monospace;font-size:15px;color:#7FD8CF">.slice(0, 600)</div>
         <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Production truncated each article to 600 characters of RSS snippet. The figures live further down the article - the model never received them. Meanwhile the golden set held the full text I'd pasted in by hand.</p>
-        <p style="margin:0 0 clamp(22px,3vw,30px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">So the model wasn't dropping the numbers. <strong style="color:#ECEAE6;font-weight:600">It never had them.</strong></p>
+        <p style="margin:0 0 clamp(22px,3vw,30px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">The AI wasn't leaving the numbers out. They were never in the text it received.</p>
         <h3 style="font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(19px,2vw,24px);line-height:1.3;margin:0 0 14px;color:#ECEAE6">The fix</h3>
         <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Production now fetches each article URL, strips the page to text, and passes 4,000 characters instead of 600. The next morning's digest - a different story, this one on US EV sales - carried "5.8% market share, 247,226 units, -20.5%, $7,500 tax credit": figures that sit well beyond the 600-character cutoff the old pipeline used.</p>
-        <p style="margin:0 0 clamp(22px,3vw,30px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">What I take from it:</strong> an offline eval is only as valid as its resemblance to the production path. Mine diverged at one line, and the divergence flattered the score by roughly six times.</p>
+        <p style="margin:0 0 clamp(22px,3vw,30px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">What I take from it:</strong> an offline eval is only as valid as its resemblance to the production path. Mine diverged at one line, and that one line made the score look about six times better than the real output.</p>
         <div style="border:1px solid rgba(236,234,230,0.14);border-radius:6px;overflow:hidden;background:#11141A"><img src="screenshots/01-production-flow.png" alt="The production n8n workflow: schedule, four RSS reads, merge, article fetch, Claude, Gmail" style="display:block;width:100%"></div>
         <p style="margin:12px 0 0;font-size:14.5px;line-height:1.7;color:#B4AFBB;font-style:italic;font-weight:300;max-width:60ch">Production after the fix - the article fetch and text extraction now sit between the feed merge and the model.</p>
       </section>
@@ -646,7 +646,7 @@ a:hover { color: #4FB5AC; }
         <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">08</div>
         <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">finding 2 - the same input doesn't give the same output</h2>
         <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">Re-running the eval unchanged, one digest named five games; the next named three. Coverage on that article moved 1.00 → 0.83. Nothing had changed - not the prompt, not the data, not the model.</p>
-        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">This is ordinary sampling behaviour, but it has a blunt consequence for anyone reading a single eval score as truth: <strong style="color:#ECEAE6;font-weight:600">one run is one sample, not a measurement.</strong> Which leads directly to the next thing worth knowing.</p>
+        <p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">This is normal for AI models, and it means a single run is one sample, not a measurement.</p>
       </section>
 
       <section data-reveal="">
@@ -668,7 +668,7 @@ a:hover { color: #4FB5AC; }
           </div>
           <p style="margin:clamp(16px,2.2vw,22px) 0 0;font-size:16px;line-height:1.7;color:#C7C3CD;font-weight:300"><strong style="color:#ECEAE6;font-weight:600">Working rule:</strong> a difference below ~0.035 (2 sd) is not a result.</p>
         </div>
-        <p style="margin:clamp(20px,2.6vw,28px) 0 clamp(22px,3vw,30px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">This is the cheapest useful number in the whole project - four clicks - and it's the one that prevents weeks spent tuning prompts against movement that was always going to happen anyway. It's also the answer to the first question anyone should ask about an A/B result: <em>how do you know that isn't noise?</em></p>
+        <p style="margin:clamp(20px,2.6vw,28px) 0 clamp(22px,3vw,30px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">It took four runs to measure, and it tells me which prompt changes are real improvements and which are just noise.</p>
         <div style="border:1px solid rgba(236,234,230,0.14);border-radius:6px;overflow:hidden;background:#11141A"><img src="screenshots/03-evaluations-runs.png" alt="n8n Evaluations tab showing coverage tracked across successive runs" style="display:block;width:100%"></div>
         <p style="margin:12px 0 0;font-size:14.5px;line-height:1.7;color:#B4AFBB;font-style:italic;font-weight:300;max-width:60ch">Runs tracked in n8n's Evaluations tab. Metrics are set by the workflow itself, so score history comes for free - no separate store.</p>
       </section>
@@ -755,7 +755,7 @@ a:hover { color: #4FB5AC; }
           </div>
         </div>
 
-        <p style="margin:clamp(20px,2.6vw,28px) 0 clamp(22px,3vw,30px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">One detail worth naming: if the judge returns unparseable JSON, the workflow throws rather than recording a zero. A zero looks like a bad digest; it's actually a broken judge. Silently conflating the two would quietly poison every number downstream.</p>
+        <p style="margin:clamp(20px,2.6vw,28px) 0 clamp(22px,3vw,30px);font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">If the judge returns a broken answer, the workflow stops instead of recording a zero, because a zero would look like a bad digest when the problem is actually the judge.</p>
         <div style="border:1px solid rgba(236,234,230,0.14);border-radius:6px;overflow:hidden;background:#11141A"><img src="screenshots/02-eval-flow.png" alt="The eval workflow: dataset trigger, generate, judge, score, set outputs, set metrics" style="display:block;width:100%"></div>
         <p style="margin:12px 0 0;font-size:14.5px;line-height:1.7;color:#B4AFBB;font-style:italic;font-weight:300;max-width:60ch">Built on n8n's native evaluation nodes rather than a bespoke harness.</p>
       </section>
@@ -763,7 +763,7 @@ a:hover { color: #4FB5AC; }
       <section data-reveal="">
         <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">11</div>
         <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">why six articles were enough</h2>
-        <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">The sample is small, and I'd rather be the one to say so. But the three things this surfaced don't depend on sample size, and that's the argument for building the smallest version first.</p>
+        <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty">The sample is small, but the three things it found don't depend on sample size.</p>
         <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">A truncation bug, a non-deterministic model and a noise floor look the same at n=6 as at n=600.</strong> The 600-character cutoff was silently costing the product every verifiable number in a story, and it had been doing that in my inbox every weekday morning without me noticing. Six labelled articles found it in an evening. Six hundred would have found the same thing, later and at more cost.</p>
         <p style="margin:0 0 16px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">The mechanism now exists and has been checked.</strong> Dataset, judge, scoring, write-back, tracked metrics - and, importantly, a judge whose verdicts I've compared against my own rather than assumed. Growing this is labelling work now, not engineering work.</p>
       </section>
@@ -771,8 +771,7 @@ a:hover { color: #4FB5AC; }
       <section data-reveal="">
         <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;color:#D6D2DC;margin-bottom:12px">12</div>
         <h2 style="font-family:Newsreader,Georgia,serif;font-weight:300;font-size:clamp(23px,2.6vw,33px);line-height:1.2;letter-spacing:-0.012em;margin:0 0 16px;text-wrap:pretty">limitations</h2>
-        <p style="margin:0 0 18px;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:70ch">Stated plainly, because an eval that hides these isn't an eval.</p>
-        <div style="display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;flex-direction:column;gap:14px">
           <div style="display:flex;gap:14px"><span style="color:#4FB5AC;flex:0 0 auto">–</span><p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:68ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">n = 6 articles, 24 items.</strong> Enough to build and validate the mechanism; not enough for confident deltas.</p></div>
           <div style="display:flex;gap:14px"><span style="color:#4FB5AC;flex:0 0 auto">–</span><p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:68ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">Class imbalance 22:2</strong> makes κ = 1.00 far less impressive than the number suggests.</p></div>
           <div style="display:flex;gap:14px"><span style="color:#4FB5AC;flex:0 0 auto">–</span><p style="margin:0;font-size:17px;line-height:1.82;color:#C7C3CD;font-weight:300;max-width:68ch;text-wrap:pretty"><strong style="color:#ECEAE6;font-weight:600">Single labeller.</strong> No second annotator, so no measure of how much my own labels drift.</p></div>
