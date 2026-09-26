@@ -357,6 +357,12 @@
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
   a[data-card]:hover, a[data-card]:focus-visible { border-color: rgba(79,181,172,0.55) !important; background: #141821 !important; transform: translateY(-3px) !important; }
   @media (prefers-reduced-motion: reduce) { a[data-card]:hover, a[data-card]:focus-visible { transform: none !important; } }
+  #about .about-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  #about .about-grid > div:first-child { grid-column: 1 / -1; padding-bottom: clamp(26px,3.4vw,40px); border-bottom: 1px solid rgba(236,234,230,0.11); }
+  #about .about-grid > div:first-child p { font-size: clamp(18px,1.6vw,22px) !important; line-height: 1.7 !important; color: #ECEAE6 !important; max-width: 62ch; }
+  #about .about-grid > div:not(:first-child) { flex-direction: column; gap: 12px !important; }
+  #about .about-grid > div:not(:first-child) > div:first-child { flex: none !important; padding-top: 0 !important; }
+  #about .about-grid > div:not(:first-child) p { font-size: 15.5px !important; }
   html, body { overflow-x: hidden; max-width: 100%; }
   @media (max-width: 640px) {
     header > div { flex-wrap: wrap !important; row-gap: 8px !important; justify-content: center !important; text-align: center; padding-top: 12px !important; padding-bottom: 12px !important; }
@@ -365,6 +371,9 @@
     section#top > div:last-child > div:first-child { flex-basis: 100% !important; }
     section#top > div:last-child > div:last-child { flex-basis: 62% !important; margin: 0 auto !important; }
     #about > div { grid-template-columns: 1fr !important; }
+    #about .about-grid { grid-template-columns: 1fr !important; }
+    #about .about-grid > div:first-child { flex-direction: column; gap: 12px !important; }
+    #about .about-grid > div:first-child > div:first-child { flex: none !important; }
     .stat-row { grid-template-columns: 1fr !important; }
     .stat-cell { border-right: 0 !important; border-top: 1px solid rgba(236,234,230,0.09); padding-left: 0 !important; }
     .stat-cell:first-child { border-top: 0; }
@@ -531,7 +540,7 @@
   </section>
 
   <section id="about" style="position:relative;z-index:1;background:linear-gradient(to bottom, rgba(7,8,11,0) 0%, rgba(7,8,11,0.36) 20%, rgba(7,8,11,0.36) 80%, rgba(7,8,11,0) 100%)">
-    <div style="max-width:1160px;margin:0 auto;padding:clamp(44px,6vw,80px) clamp(20px,5vw,56px);display:grid;gap:clamp(26px,3.4vw,44px) clamp(40px,5vw,64px);grid-template-columns:repeat(2,1fr)">
+    <div class="about-grid" style="max-width:1160px;margin:0 auto;padding:clamp(44px,6vw,80px) clamp(20px,5vw,56px);display:grid;gap:clamp(26px,3.4vw,44px) clamp(40px,5vw,64px);grid-template-columns:repeat(2,1fr)">
       <div data-reveal="" style="display:flex;gap:clamp(16px,2vw,28px)">
         <div style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;flex:0 0 clamp(124px,10vw,140px);padding-top:3px">who I am</div>
         <p style="margin:0;font-size:16.5px;line-height:1.8;color:#C7C3CD;font-weight:300;text-wrap:pretty">A curious, tech-savvy product manager with 4+ years in regulated, high-stakes industries. My path went from finance and audit at PwC through UX/UI design to product, so I look at a product from the business side as much as from the user's. Outside work I love picking up new tools and growing in every direction - Hyrox, golf, via ferrata, qigong.</p>
@@ -542,7 +551,7 @@
       </div>
       <div data-reveal="" style="display:flex;gap:clamp(16px,2vw,28px)">
         <div style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;flex:0 0 clamp(124px,10vw,140px);padding-top:3px">certifications</div>
-        <p style="margin:0;font-size:16.5px;line-height:1.8;color:#C7C3CD;font-weight:300;text-wrap:pretty">Claude Certified Associate - Foundations, Anthropic · 2026<br>Aha! Product Management Professional · 2024<br>Thought Machine - Vault Fundamentals · 2023</p>
+        <p style="margin:0;font-size:16.5px;line-height:1.8;color:#C7C3CD;font-weight:300;text-wrap:pretty">Claude Certified Associate - Foundations, Anthropic&nbsp;·&nbsp;2026<br>Aha! Product Management Professional&nbsp;·&nbsp;2024<br>Thought Machine - Vault Fundamentals&nbsp;·&nbsp;2023</p>
       </div>
       <div data-reveal="" style="display:flex;gap:clamp(16px,2vw,28px)">
         <div style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.09em;text-transform:uppercase;color:#4FB5AC;flex:0 0 clamp(124px,10vw,140px);padding-top:3px">industries</div>
